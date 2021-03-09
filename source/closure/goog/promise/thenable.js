@@ -32,9 +32,10 @@ goog.Thenable = function() {};
  * an exception, the child Promise will be rejected with the thrown value
  * instead.
  *
- * If the Thenable is rejected, the `onRejected` callback will be invoked
- * with the rejection reason as argument, and the child Promise will be rejected
- * with the return value of the callback or thrown value.
+ * If the Thenable is rejected, the `onRejected` callback will be invoked with
+ * the rejection reason as argument. Similar to the fulfilled case, the child
+ * Promise will then be resolved with the return value of the callback, or
+ * rejected with the thrown value if the callback throws an exception.
  *
  * @param {?(function(this:THIS, TYPE): VALUE)=} opt_onFulfilled A
  *     function that will be invoked with the fulfillment value if the Promise
@@ -90,6 +91,7 @@ goog.Thenable.IMPLEMENTED_BY_PROP = '$goog_Thenable';
  *     corresponding class must have already implemented the interface.
  */
 goog.Thenable.addImplementation = function(ctor) {
+  'use strict';
   if (COMPILED) {
     ctor.prototype[goog.Thenable.IMPLEMENTED_BY_PROP] = true;
   } else {
@@ -105,6 +107,7 @@ goog.Thenable.addImplementation = function(ctor) {
  *     The class/superclass of the instance must call `addImplementation`.
  */
 goog.Thenable.isImplementedBy = function(object) {
+  'use strict';
   if (!object) {
     return false;
   }

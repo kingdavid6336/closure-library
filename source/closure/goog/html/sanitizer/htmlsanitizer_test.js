@@ -62,6 +62,7 @@ function assertSanitizedHtml(originalHtml, expectedHtml, opt_sanitizer) {
 /**
  * @param {!SafeHtml} safeHtml Sanitized HTML which contains a style.
  * @return {string} cssText contained within SafeHtml.
+ * @suppress {strictMissingProperties} suppression added to enable type checking
  */
 function getStyle(safeHtml) {
   const tmpElement = dom.safeHtmlToNode(safeHtml);
@@ -75,25 +76,6 @@ function getStyle(safeHtml) {
  */
 function otag(tag) {
   return `data-sanitizer-original-tag="${tag}"`;
-}
-
-/**
- * Sanitize content, let the browser apply its own HTML tree correction by
- * attaching the content to the document, and then assert it matches the
- * expected value.
- * @param {string} expected
- * @param {string} input
- */
-function assertAfterInsertionEquals(expected, input) {
-  const sanitizer =
-      new Builder().allowFormTag().allowStyleTag().withStyleContainer().build();
-  input = SafeHtml.unwrap(sanitizer.sanitize(input));
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-  div.innerHTML = input;
-  googTestingDom.assertHtmlMatches(
-      expected, div.innerHTML, true /* opt_strictAttributes */);
-  div.parentNode.removeChild(div);
 }
 
 // TODO(pelizzi): name of test does not make sense
@@ -365,7 +347,7 @@ testSuite({
     // grave accent char as seen here:
     // Browser support: [NS8.1-G|FF2.0]
     safeHtml = '';
-    xssHtml = '<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>';
+    xssHtml = '<BODY onload!#$%&()*~+-_.,:;?@[/|]^`=alert("XSS")>';
     assertSanitizedHtml(xssHtml, safeHtml);
 
     // Non-alpha-non-digit part 3 XSS. Yair Amit brought this to my attention
@@ -621,7 +603,7 @@ testSuite({
     // into an infinite loop of alerts):
     // Browser support: [IE6.0|NS8.1-IE]
     safeHtml = '';
-    xssHtml = '<STYLE>@im\port\'\ja\vasc\ript:alert(window)\';</STYLE>';
+    xssHtml = '<STYLE>@import\'ja\vasc\ript:alert(window)\';</STYLE>';
     assertSanitizedHtml(xssHtml, safeHtml);
 
     // STYLE attribute using a comment to break up expression (Thanks to Roman

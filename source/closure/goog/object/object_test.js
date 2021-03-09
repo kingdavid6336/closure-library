@@ -191,6 +191,36 @@ testSuite({
     assertEquals(5, clone.e.f.h);
   },
 
+  testUnsafeCloneTypedArray() {
+    if (typeof ArrayBuffer !== 'function' ||
+        typeof ArrayBuffer.isView !== 'function') {
+      return;
+    }
+    function array(ctor, ...elems) {  // IE 11 does not support TypedArray.of
+      const arr = new ctor(elems.length);
+      for (let i = 0; i < elems.length; i++) {
+        arr[i] = elems[i];
+      }
+      return arr;
+    }
+
+    const original = {a: array(Uint8Array, 1, 2), b: array(Int16Array, 3, 4)};
+    const clone = googObject.unsafeClone(original);
+
+    assertNotEquals(original, clone);
+    assertNotEquals(original.a, clone.a);
+    assertNotEquals(original.b, clone.b);
+
+    assertTrue(clone.a instanceof Uint8Array);
+    assertEquals(2, clone.a.length);
+    assertEquals(1, clone.a[0]);
+    assertEquals(2, clone.a[1]);
+    assertTrue(clone.b instanceof Int16Array);
+    assertEquals(2, clone.b.length);
+    assertEquals(3, clone.b[0]);
+    assertEquals(4, clone.b[1]);
+  },
+
   testUnsafeCloneFunctions() {
     const original = {f: functions.constant('hi')};
     const clone = googObject.unsafeClone(original);
@@ -329,6 +359,7 @@ testSuite({
     assertEquals('d', b[3]);
   },
 
+  /** @suppress {missingProperties} suppression added to enable type checking */
   testExtend() {
     let o = {};
     let o2 = {a: 0, b: 1};
@@ -480,7 +511,15 @@ testSuite({
     x.propA = 4;
     x.propB = 6;
     try {
+      /**
+       * @suppress {strictMissingProperties} suppression added to enable type
+       * checking
+       */
       y.propA = 5;
+      /**
+       * @suppress {strictMissingProperties} suppression added to enable type
+       * checking
+       */
       y.propB = 7;
     } catch (e) {
     }
@@ -513,9 +552,17 @@ testSuite({
     const x = {propA: 3};
     const y = googObject.createImmutableView(x);
     assertThrows(() => {
+      /**
+       * @suppress {strictMissingProperties} suppression added to enable type
+       * checking
+       */
       y.propA = 4;
     });
     assertThrows(() => {
+      /**
+       * @suppress {strictMissingProperties} suppression added to enable type
+       * checking
+       */
       y.propB = 4;
     });
   },
@@ -538,39 +585,6 @@ testSuite({
 
   testObjectsWithSameKeysInDifferentOrderAreEqual() {
     assertTrue(googObject.equals({'a': 1, 'b': 2}, {'b': 2, 'a': 1}));
-  },
-
-  testIs() {
-    const object = {};
-    assertTrue(googObject.is(object, object));
-    assertFalse(googObject.is(object, {}));
-
-    assertTrue(googObject.is(NaN, NaN));
-    assertTrue(googObject.is(0, 0));
-    assertTrue(googObject.is(1, 1));
-    assertTrue(googObject.is(-1, -1));
-    assertTrue(googObject.is(123, 123));
-    assertFalse(googObject.is(0, -0));
-    assertFalse(googObject.is(-0, 0));
-    assertFalse(googObject.is(0, 1));
-
-    assertTrue(googObject.is(true, true));
-    assertTrue(googObject.is(false, false));
-    assertFalse(googObject.is(true, false));
-    assertFalse(googObject.is(false, true));
-
-    assertTrue(googObject.is('', ''));
-    assertTrue(googObject.is('a', 'a'));
-    assertFalse(googObject.is('', 'a'));
-    assertFalse(googObject.is('a', ''));
-    assertFalse(googObject.is('a', 'b'));
-
-    assertFalse(googObject.is(true, 'true'));
-    assertFalse(googObject.is('true', true));
-    assertFalse(googObject.is(false, 'false'));
-    assertFalse(googObject.is('false', false));
-    assertFalse(googObject.is(0, '0'));
-    assertFalse(googObject.is('0', 0));
   },
 
   testGetAllPropertyNames_enumerableProperties() {
@@ -610,6 +624,7 @@ testSuite({
         expected, googObject.getAllPropertyNames(child.prototype));
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testGetAllPropertyNames_es6ClassProperties() {
     // Create an ES6 class via eval so we can bail out if it's a syntax error in
     // browsers that don't support ES6 classes.
@@ -654,6 +669,7 @@ testSuite({
 
     // There's slightly different behavior depending on what APIs the browser
     // under test supports.
+    /** @suppress {checkTypes} suppression added to enable type checking */
     const additionalProps = !!Object.getOwnPropertyNames ?
         Object.getOwnPropertyNames(Object.prototype) :
         [];

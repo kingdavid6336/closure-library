@@ -16,6 +16,8 @@ goog.provide('goog.loader.AbstractModuleManager.FailureType');
 goog.require('goog.module.AbstractModuleLoader');
 goog.require('goog.module.ModuleInfo');
 goog.require('goog.module.ModuleLoadCallback');
+goog.require('goog.module.ModuleLoadFailureType');
+goog.requireType('goog.html.TrustedResourceUrl');
 
 
 
@@ -27,6 +29,7 @@ goog.require('goog.module.ModuleLoadCallback');
  * @struct
  */
 goog.loader.AbstractModuleManager = function() {
+  'use strict';
   /**
    * The module context needed for module initialization.
    * @private {?Object}
@@ -80,22 +83,8 @@ goog.loader.AbstractModuleManager.CallbackType = {
  * The possible reasons for a module load failure callback being fired.
  * @enum {number}
  */
-goog.loader.AbstractModuleManager.FailureType = {
-  /** 401 Status. */
-  UNAUTHORIZED: 0,
-
-  /** Error status (not 401) returned multiple times. */
-  CONSECUTIVE_FAILURES: 1,
-
-  /** Request timeout. */
-  TIMEOUT: 2,
-
-  /** 410 status, old code gone. */
-  OLD_CODE_GONE: 3,
-
-  /** The onLoad callbacks failed. */
-  INIT_ERROR: 4
-};
+goog.loader.AbstractModuleManager.FailureType =
+    goog.module.ModuleLoadFailureType;
 
 
 /**
@@ -160,6 +149,34 @@ goog.loader.AbstractModuleManager.prototype.setAllModuleInfoString = function(
  */
 goog.loader.AbstractModuleManager.prototype.getModuleInfo = function(id) {};
 
+/**
+ * Register an extra runtime module dependency. After an extra edge is added,
+ * any subsequent calls to load or loadMultiple will fetch toModule if the
+ * fromModule was loaded.
+ *
+ * The mechanism for this is implementation dependent. If the implementation
+ * does not support extra edges, it will throw an error.
+ * @param {string} fromModule The dependent module of the extra edge.
+ * @param {string} toModule The module dependency of the extra edge.
+ */
+goog.loader.AbstractModuleManager.prototype.addExtraEdge = function(
+    fromModule, toModule) {
+  'use strict';
+  throw new Error('addExtraEdge is not implemented.');
+};
+
+/**
+ * Remove an existing extra edge previously added by `addExtraEdge`.
+ *
+ * If the implementation does not support extra edges, it will throw an error.
+ * @param {string} fromModule The dependent module of the extra edge.
+ * @param {string} toModule The module dependency of the extra edge.
+ */
+goog.loader.AbstractModuleManager.prototype.removeExtraEdge = function(
+    fromModule, toModule) {
+  'use strict';
+  throw new Error('removeExtraEdge is not implemented.');
+};
 
 /**
  * Sets the module uris.
@@ -172,22 +189,20 @@ goog.loader.AbstractModuleManager.prototype.setModuleTrustedUris = function(
 
 /**
  * Gets the application-specific module loader.
- * @return {?goog.module.AbstractModuleLoader} An object that has a
- *     loadModules(ids, moduleInfoMap, opt_successFn, opt_errFn,
- *         opt_timeoutFn, opt_forceReload) method.
+ * @return {?goog.module.AbstractModuleLoader} the loader.
  */
 goog.loader.AbstractModuleManager.prototype.getLoader = function() {
+  'use strict';
   return this.loader_;
 };
 
 
 /**
  * Sets the application-specific module loader.
- * @param {!goog.module.AbstractModuleLoader} loader An object that has a
- *     loadModules(ids, moduleInfoMap, opt_successFn, opt_errFn,
- *         opt_timeoutFn, opt_forceReload) method.
+ * @param {!goog.module.AbstractModuleLoader} loader
  */
 goog.loader.AbstractModuleManager.prototype.setLoader = function(loader) {
+  'use strict';
   this.loader_ = loader;
 };
 
@@ -197,6 +212,7 @@ goog.loader.AbstractModuleManager.prototype.setLoader = function(loader) {
  * @return {?Object} The context.
  */
 goog.loader.AbstractModuleManager.prototype.getModuleContext = function() {
+  'use strict';
   return this.moduleContext_;
 };
 
@@ -207,6 +223,7 @@ goog.loader.AbstractModuleManager.prototype.getModuleContext = function() {
  */
 goog.loader.AbstractModuleManager.prototype.setModuleContext = function(
     context) {
+  'use strict';
   this.moduleContext_ = context;
 };
 
@@ -216,6 +233,7 @@ goog.loader.AbstractModuleManager.prototype.setModuleContext = function(
  * @return {boolean} TRUE iff the ModuleManager is active (i.e., not idle).
  */
 goog.loader.AbstractModuleManager.prototype.isActive = function() {
+  'use strict';
   return false;
 };
 
@@ -225,6 +243,7 @@ goog.loader.AbstractModuleManager.prototype.isActive = function() {
  * @return {boolean} TRUE iff the ModuleManager is user active (i.e., not idle).
  */
 goog.loader.AbstractModuleManager.prototype.isUserActive = function() {
+  'use strict';
   return false;
 };
 
@@ -251,6 +270,7 @@ goog.loader.AbstractModuleManager.prototype.preloadModule = function(
  * @param {string} id The id of the module to prefetch.
  */
 goog.loader.AbstractModuleManager.prototype.prefetchModule = function(id) {
+  'use strict';
   throw new Error('prefetchModule is not implemented.');
 };
 

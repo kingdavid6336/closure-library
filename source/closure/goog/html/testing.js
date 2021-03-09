@@ -26,6 +26,7 @@ goog.require('goog.html.SafeStyleSheet');
 goog.require('goog.html.SafeUrl');
 goog.require('goog.html.TrustedResourceUrl');
 goog.require('goog.testing.mockmatchers.ArgumentMatcher');
+goog.requireType('goog.i18n.bidi.Dir');
 
 
 /**
@@ -41,6 +42,7 @@ goog.require('goog.testing.mockmatchers.ArgumentMatcher');
  * @return {!goog.html.SafeHtml}
  */
 goog.html.testing.newSafeHtmlForTest = function(html, opt_dir) {
+  'use strict';
   return goog.html.SafeHtml.createSafeHtmlSecurityPrivateDoNotAccessOrElse(
       html, (opt_dir == undefined ? null : opt_dir));
 };
@@ -56,6 +58,7 @@ goog.html.testing.newSafeHtmlForTest = function(html, opt_dir) {
  * @return {!goog.html.SafeScript}
  */
 goog.html.testing.newSafeScriptForTest = function(script) {
+  'use strict';
   return goog.html.SafeScript.createSafeScriptSecurityPrivateDoNotAccessOrElse(
       script);
 };
@@ -71,6 +74,7 @@ goog.html.testing.newSafeScriptForTest = function(script) {
  * @return {!goog.html.SafeStyle}
  */
 goog.html.testing.newSafeStyleForTest = function(style) {
+  'use strict';
   return goog.html.SafeStyle.createSafeStyleSecurityPrivateDoNotAccessOrElse(
       style);
 };
@@ -87,6 +91,7 @@ goog.html.testing.newSafeStyleForTest = function(style) {
  * @return {!goog.html.SafeStyleSheet}
  */
 goog.html.testing.newSafeStyleSheetForTest = function(styleSheet) {
+  'use strict';
   return goog.html.SafeStyleSheet
       .createSafeStyleSheetSecurityPrivateDoNotAccessOrElse(styleSheet);
 };
@@ -102,6 +107,7 @@ goog.html.testing.newSafeStyleSheetForTest = function(styleSheet) {
  * @return {!goog.html.SafeUrl}
  */
 goog.html.testing.newSafeUrlForTest = function(url) {
+  'use strict';
   return goog.html.SafeUrl.createSafeUrlSecurityPrivateDoNotAccessOrElse(url);
 };
 
@@ -117,6 +123,7 @@ goog.html.testing.newSafeUrlForTest = function(url) {
  * @return {!goog.html.TrustedResourceUrl}
  */
 goog.html.testing.newTrustedResourceUrlForTest = function(url) {
+  'use strict';
   return goog.html.TrustedResourceUrl
       .createTrustedResourceUrlSecurityPrivateDoNotAccessOrElse(url);
 };
@@ -128,10 +135,12 @@ goog.html.testing.newTrustedResourceUrlForTest = function(url) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchSafeHtml = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.SafeHtml) {
     expected = goog.html.SafeHtml.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.SafeHtml.unwrap(actual) == expected;
   });
 };
@@ -143,10 +152,12 @@ goog.html.testing.matchSafeHtml = function(expected) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchSafeScript = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.SafeScript) {
     expected = goog.html.SafeScript.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.SafeScript.unwrap(actual) == expected;
   });
 };
@@ -158,10 +169,12 @@ goog.html.testing.matchSafeScript = function(expected) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchSafeStyle = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.SafeStyle) {
     expected = goog.html.SafeStyle.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.SafeStyle.unwrap(actual) == expected;
   });
 };
@@ -173,10 +186,12 @@ goog.html.testing.matchSafeStyle = function(expected) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchSafeStyleSheet = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.SafeStyleSheet) {
     expected = goog.html.SafeStyleSheet.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.SafeStyleSheet.unwrap(actual) == expected;
   });
 };
@@ -188,10 +203,12 @@ goog.html.testing.matchSafeStyleSheet = function(expected) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchSafeUrl = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.SafeUrl) {
     expected = goog.html.SafeUrl.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.SafeUrl.unwrap(actual) == expected;
   });
 };
@@ -203,10 +220,12 @@ goog.html.testing.matchSafeUrl = function(expected) {
  * @return {!goog.testing.mockmatchers.ArgumentMatcher}
  */
 goog.html.testing.matchTrustedResourceUrl = function(expected) {
+  'use strict';
   if (expected instanceof goog.html.TrustedResourceUrl) {
     expected = goog.html.TrustedResourceUrl.unwrap(expected);
   }
   return new goog.testing.mockmatchers.ArgumentMatcher(function(actual) {
+    'use strict';
     return goog.html.TrustedResourceUrl.unwrap(actual) == expected;
   });
 };
@@ -234,6 +253,7 @@ goog.html.testing.matchTrustedResourceUrl = function(expected) {
  *     goog.string.TypedString, true if typed strings equal, false if not.
  */
 goog.html.testing.checkTypedStringEquality = function(actual, expected) {
+  'use strict';
   if (actual && actual.implementsGoogStringTypedString) {
     if (expected != null && expected.implementsGoogStringTypedString) {
       if (!(actual instanceof expected.constructor)) {

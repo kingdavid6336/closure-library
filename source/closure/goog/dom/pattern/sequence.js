@@ -14,6 +14,7 @@ goog.require('goog.dom.NodeType');
 goog.require('goog.dom.pattern');
 goog.require('goog.dom.pattern.AbstractPattern');
 goog.require('goog.dom.pattern.MatchType');
+goog.requireType('goog.dom.TagWalkType');
 
 
 
@@ -29,6 +30,7 @@ goog.require('goog.dom.pattern.MatchType');
  * @final
  */
 goog.dom.pattern.Sequence = function(patterns, opt_ignoreWhitespace) {
+  'use strict';
   /**
    * Ordered array of patterns to match.
    *
@@ -72,6 +74,7 @@ goog.dom.pattern.Sequence.BREAKING_TEXTNODE_RE_ = /^\s*$/;
  * @override
  */
 goog.dom.pattern.Sequence.prototype.matchToken = function(token, type) {
+  'use strict';
   // If the option is set, ignore any whitespace only text nodes
   if (this.ignoreWhitespace_ && token.nodeType == goog.dom.NodeType.TEXT &&
       goog.dom.pattern.Sequence.BREAKING_TEXTNODE_RE_.test(token.nodeValue)) {
@@ -125,6 +128,7 @@ goog.dom.pattern.Sequence.prototype.matchToken = function(token, type) {
  * @override
  */
 goog.dom.pattern.Sequence.prototype.reset = function() {
+  'use strict';
   if (this.patterns[this.currentPosition_]) {
     this.patterns[this.currentPosition_].reset();
   }

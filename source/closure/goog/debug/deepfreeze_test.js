@@ -8,8 +8,8 @@ goog.module('goog.deepFreezeTest');
 goog.setTestOnly();
 
 const asserts = goog.require('goog.asserts');
-const deepFreeze = goog.require('goog.debug.deepFreeze');
 const testSuite = goog.require('goog.testing.testSuite');
+const {deepFreeze} = goog.require('goog.debug.deepFreeze');
 
 testSuite({
   testDeepFreeze: {
@@ -92,6 +92,9 @@ testSuite({
       assertEquals('f', f.c.r);
     },
 
+    /**
+       @suppress {missingProperties} suppression added to enable type checking
+     */
     testObjectWithChildMultipath() {
       const a = {
         'c': {
@@ -119,9 +122,17 @@ testSuite({
         console.log(a.c);
       });
       assertThrows(() => {
+        /**
+         * @suppress {missingProperties} suppression added to enable type
+         * checking
+         */
         f.c.g.a = 'c';
       });
       assertThrows(() => {
+        /**
+         * @suppress {missingProperties} suppression added to enable type
+         * checking
+         */
         f.c.h.a = 'c';
       });
 
@@ -150,6 +161,7 @@ testSuite({
       });
     },
 
+    /** @suppress {checkTypes} suppression added to enable type checking */
     testObjectWithSymbolValues() {
       const s = Symbol(5);
       if (s instanceof Object) {
@@ -262,6 +274,10 @@ testSuite({
       assertThrows(() => {
         deepFreeze({
           a: 5,
+          /**
+             @suppress {undefinedVars} suppression added to enable type
+             checking
+           */
           set aThing(v) {
             a++;
           },

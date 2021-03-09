@@ -1,16 +1,8 @@
-// Copyright 2007 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 
 /**
@@ -19,8 +11,11 @@
  */
 
 goog.provide('goog.a11y.aria.Announcer');
-
 goog.require('goog.Disposable');
+// TODO(user): Fix issue breaking external projects and remove goog.Timer
+// dependency.
+/** @suppress {extraRequire} */
+goog.require('goog.Timer');
 goog.require('goog.a11y.aria');
 goog.require('goog.a11y.aria.LivePriority');
 goog.require('goog.a11y.aria.State');
@@ -41,6 +36,7 @@ goog.require('goog.string');
  * @final
  */
 goog.a11y.aria.Announcer = function(opt_domHelper) {
+  'use strict';
   goog.a11y.aria.Announcer.base(this, 'constructor');
 
   /**
@@ -64,6 +60,7 @@ goog.inherits(goog.a11y.aria.Announcer, goog.Disposable);
 
 /** @override */
 goog.a11y.aria.Announcer.prototype.disposeInternal = function() {
+  'use strict';
   goog.object.forEach(
       this.liveRegions_, this.domHelper_.removeNode, this.domHelper_);
   this.liveRegions_ = null;
@@ -80,6 +77,7 @@ goog.a11y.aria.Announcer.prototype.disposeInternal = function() {
  *     message. Defaults to POLITE.
  */
 goog.a11y.aria.Announcer.prototype.say = function(message, opt_priority) {
+  'use strict';
   const priority = opt_priority || goog.a11y.aria.LivePriority.POLITE;
   const liveRegion = this.getLiveRegion_(priority);
   // TODO(user): Remove the code once Chrome fix the bug on their
@@ -102,6 +100,7 @@ goog.a11y.aria.Announcer.prototype.say = function(message, opt_priority) {
  * @private
  */
 goog.a11y.aria.Announcer.prototype.getLiveRegion_ = function(priority) {
+  'use strict';
   var liveRegion = this.liveRegions_[priority];
   if (liveRegion) {
     // Make sure the live region is not aria-hidden.

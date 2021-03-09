@@ -1,16 +1,8 @@
-// Copyright 2012 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 goog.module('goog.ui.PaletteTest');
 goog.setTestOnly();
@@ -49,6 +41,7 @@ testSuite({
 
   testAfterHighlightListener() {
     palette.setHighlightedIndex(0);
+    /** @suppress {checkTypes} suppression added to enable type checking */
     const handler = new recordFunction();
     googEvents.listen(palette, Palette.EventType.AFTER_HIGHLIGHT, handler);
     palette.setHighlightedIndex(2);
@@ -57,6 +50,7 @@ testSuite({
     assertEquals(2, handler.getCallCount());
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testHighlightItemUpdatesParentA11yActiveDescendant() {
     const container = new Container();
     container.render(document.getElementById('sandbox'));
@@ -82,6 +76,7 @@ testSuite({
     container.dispose();
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testHighlightCellEvents() {
     const container = new Container();
     container.render(document.getElementById('sandbox'));
@@ -239,6 +234,7 @@ testSuite({
     assertEquals(3, palette.getHighlightedIndex());
 
     // Click somewhere in the palette, but not inside a cell.
+    /** @suppress {checkTypes} suppression added to enable type checking */
     const mouseUp = new googEvents.BrowserEvent(
         {type: 'mouseup', button: 1, target: palette});
     palette.handleMouseUp(mouseUp);

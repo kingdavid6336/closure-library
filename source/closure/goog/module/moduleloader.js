@@ -1,16 +1,8 @@
-// Copyright 2008 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview The module loader for loading modules across the network.
@@ -32,6 +24,7 @@ goog.require('goog.Timer');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dom');
+goog.require('goog.dom.TagName');
 goog.require('goog.dom.safe');
 goog.require('goog.events');
 goog.require('goog.events.Event');
@@ -48,6 +41,7 @@ goog.require('goog.net.EventType');
 goog.require('goog.net.jsloader');
 goog.require('goog.userAgent');
 goog.require('goog.userAgent.product');
+goog.requireType('goog.module.ModuleInfo');
 
 
 
@@ -58,6 +52,7 @@ goog.require('goog.userAgent.product');
  * @implements {goog.module.AbstractModuleLoader}
  */
 goog.module.ModuleLoader = function() {
+  'use strict';
   goog.module.ModuleLoader.base(this, 'constructor');
 
   /**
@@ -115,6 +110,7 @@ goog.module.ModuleLoader.prototype.useScriptTags_ = false;
  * @return {boolean} Whether sourceURL affects stack traces.
  */
 goog.module.ModuleLoader.supportsSourceUrlStackTraces = function() {
+  'use strict';
   return goog.userAgent.product.CHROME ||
       (goog.labs.userAgent.browser.isFirefox() &&
        goog.labs.userAgent.browser.isVersionOrHigher('36'));
@@ -125,6 +121,7 @@ goog.module.ModuleLoader.supportsSourceUrlStackTraces = function() {
  * @return {boolean} Whether sourceURL affects the debugger.
  */
 goog.module.ModuleLoader.supportsSourceUrlDebugger = function() {
+  'use strict';
   return goog.userAgent.product.CHROME || goog.userAgent.GECKO;
 };
 
@@ -158,6 +155,7 @@ goog.module.ModuleLoader.SYNTAX_OR_NETWORK_ERROR_CODE_ = -1;
  * @private
  */
 goog.module.ModuleLoader.createScriptElement_ = function(url) {
+  'use strict';
   const script = goog.dom.createElement(goog.dom.TagName.SCRIPT);
   goog.dom.safe.setScriptSrc(script, url);
 
@@ -176,9 +174,18 @@ goog.module.ModuleLoader.createScriptElement_ = function(url) {
  * @private
  */
 goog.module.ModuleLoader.createPreloadScriptElement_ = function(url) {
+  'use strict';
   const link = goog.dom.createElement(goog.dom.TagName.LINK);
   goog.dom.safe.setLinkHrefAndRel(link, url, 'preload');
   link.as = 'script';
+
+  // If CSP nonces are used, propagate them to dynamically created scripts.
+  // This is necessary to allow nonce-based CSPs without 'strict-dynamic'.
+  var nonce = goog.getScriptNonce();
+  if (nonce) {
+    link.setAttribute('nonce', nonce);
+  }
+
   return link;
 };
 
@@ -188,6 +195,7 @@ goog.module.ModuleLoader.createPreloadScriptElement_ = function(url) {
  * @return {boolean} Whether the debug mode is enabled.
  */
 goog.module.ModuleLoader.prototype.getDebugMode = function() {
+  'use strict';
   return this.debugMode_;
 };
 
@@ -197,6 +205,7 @@ goog.module.ModuleLoader.prototype.getDebugMode = function() {
  *     (with async=false) for loading.
  */
 goog.module.ModuleLoader.prototype.setUseScriptTags = function(useScriptTags) {
+  'use strict';
   this.useScriptTags_ = useScriptTags;
 };
 
@@ -207,6 +216,7 @@ goog.module.ModuleLoader.prototype.setUseScriptTags = function(useScriptTags) {
  *     loading.
  */
 goog.module.ModuleLoader.prototype.getUseScriptTags = function() {
+  'use strict';
   return this.useScriptTags_;
 };
 
@@ -216,6 +226,7 @@ goog.module.ModuleLoader.prototype.getUseScriptTags = function() {
  * @param {boolean} debugMode Whether the debug mode is enabled.
  */
 goog.module.ModuleLoader.prototype.setDebugMode = function(debugMode) {
+  'use strict';
   this.debugMode_ = debugMode;
 };
 
@@ -241,6 +252,7 @@ goog.module.ModuleLoader.prototype.setDebugMode = function(debugMode) {
  * @param {boolean} enabled Whether source url injection is enabled.
  */
 goog.module.ModuleLoader.prototype.setSourceUrlInjection = function(enabled) {
+  'use strict';
   this.sourceUrlInjection_ = enabled;
 };
 
@@ -250,6 +262,7 @@ goog.module.ModuleLoader.prototype.setSourceUrlInjection = function(enabled) {
  * @private
  */
 goog.module.ModuleLoader.prototype.usingSourceUrlInjection_ = function() {
+  'use strict';
   return this.sourceUrlInjection_ ||
       (this.getDebugMode() &&
        goog.module.ModuleLoader.supportsSourceUrlStackTraces());
@@ -258,20 +271,19 @@ goog.module.ModuleLoader.prototype.usingSourceUrlInjection_ = function() {
 
 /** @override */
 goog.module.ModuleLoader.prototype.loadModules = function(
-    ids, moduleInfoMap, opt_successFn, opt_errorFn, opt_timeoutFn,
-    opt_forceReload) {
+    ids, moduleInfoMap, {forceReload, onError, onSuccess, onTimeout} = {}) {
   var loadStatus = this.loadingModulesStatus_[ids] ||
       goog.module.ModuleLoader.LoadStatus.createForIds_(ids, moduleInfoMap);
   loadStatus.loadRequested = true;
-  if (loadStatus.successFn && opt_successFn) {
+  if (loadStatus.successFn && onSuccess) {
     // If there already exists a success function, chain it before the passed
     // success functon.
     loadStatus.successFn =
-        goog.functions.sequence(loadStatus.successFn, opt_successFn);
+        goog.functions.sequence(loadStatus.successFn, onSuccess);
   } else {
-    loadStatus.successFn = opt_successFn || loadStatus.successFn;
+    loadStatus.successFn = onSuccess || loadStatus.successFn;
   }
-  loadStatus.errorFn = opt_errorFn || null;
+  loadStatus.errorFn = onError || null;
 
   if (!this.loadingModulesStatus_[ids]) {
     // Modules were not prefetched.
@@ -298,6 +310,7 @@ goog.module.ModuleLoader.prototype.loadModules = function(
  * @private
  */
 goog.module.ModuleLoader.prototype.evaluateCode_ = function(moduleIds) {
+  'use strict';
   this.dispatchEvent(
       new goog.module.ModuleLoader.RequestSuccessEvent(moduleIds));
 
@@ -344,6 +357,7 @@ goog.module.ModuleLoader.prototype.evaluateCode_ = function(moduleIds) {
  */
 goog.module.ModuleLoader.prototype.handleSuccess_ = function(
     bulkLoader, moduleIds) {
+  'use strict';
   goog.log.info(this.logger, 'Code loaded for module(s): ' + moduleIds);
 
   var loadStatus = this.loadingModulesStatus_[moduleIds];
@@ -365,6 +379,7 @@ goog.module.ModuleLoader.prototype.handleSuccess_ = function(
 
 /** @override */
 goog.module.ModuleLoader.prototype.prefetchModule = function(id, moduleInfo) {
+  'use strict';
   // Do not prefetch in debug mode
   if (this.getDebugMode()) {
     return;
@@ -407,6 +422,7 @@ goog.module.ModuleLoader.prototype.prefetchModule = function(id, moduleInfo) {
  * @private
  */
 goog.module.ModuleLoader.prototype.downloadModules_ = function(ids) {
+  'use strict';
   const debugMode = this.getDebugMode();
   const sourceUrlInjection = this.usingSourceUrlInjection_();
   const useScriptTags = this.getUseScriptTags();
@@ -463,6 +479,7 @@ goog.module.ModuleLoader.prototype.downloadModules_ = function(ids) {
  */
 goog.module.ModuleLoader.prototype.loadWithNonAsyncScriptTag_ = function(
     loadStatus, ids) {
+  'use strict';
   goog.log.info(this.logger, `Loading initiated for: ${ids}`);
   if (loadStatus.trustedRequestUris.length == 0) {
     if (loadStatus.successFn) {
@@ -534,6 +551,7 @@ goog.module.ModuleLoader.prototype.loadWithNonAsyncScriptTag_ = function(
  */
 goog.module.ModuleLoader.prototype.handleError_ = function(
     bulkLoader, moduleIds, event) {
+  'use strict';
   var loadStatus = this.loadingModulesStatus_[moduleIds];
   // The bulk loader doesn't cancel other requests when a request fails. We will
   // delete the loadStatus in the first failure, so it will be undefined in
@@ -563,6 +581,7 @@ goog.module.ModuleLoader.prototype.handleError_ = function(
  */
 goog.module.ModuleLoader.prototype.handleErrorHelper_ = function(
     moduleIds, errorFn, status, opt_error) {
+  'use strict';
   this.dispatchEvent(new goog.module.ModuleLoader.RequestErrorEvent(
       moduleIds, status, opt_error));
 
@@ -614,6 +633,7 @@ goog.module.ModuleLoader.EventType = {
  * @protected
  */
 goog.module.ModuleLoader.EvaluateCodeEvent = function(moduleIds) {
+  'use strict';
   goog.module.ModuleLoader.EvaluateCodeEvent.base(
       this, 'constructor', goog.module.ModuleLoader.EventType.EVALUATE_CODE);
 
@@ -634,6 +654,7 @@ goog.inherits(goog.module.ModuleLoader.EvaluateCodeEvent, goog.events.Event);
  * @protected
  */
 goog.module.ModuleLoader.RequestSuccessEvent = function(moduleIds) {
+  'use strict';
   goog.module.ModuleLoader.RequestSuccessEvent.base(
       this, 'constructor', goog.module.ModuleLoader.EventType.REQUEST_SUCCESS);
 
@@ -657,6 +678,7 @@ goog.inherits(goog.module.ModuleLoader.RequestSuccessEvent, goog.events.Event);
  */
 goog.module.ModuleLoader.RequestErrorEvent = function(
     moduleIds, status, opt_error) {
+  'use strict';
   goog.module.ModuleLoader.RequestErrorEvent.base(
       this, 'constructor', goog.module.ModuleLoader.EventType.REQUEST_ERROR);
 
@@ -685,6 +707,7 @@ goog.inherits(goog.module.ModuleLoader.RequestErrorEvent, goog.events.Event);
  * @final
  */
 goog.module.ModuleLoader.LoadStatus = function(trustedRequestUris) {
+  'use strict';
   /**
    * The request uris.
    * @final {!Array<string>}
@@ -738,6 +761,7 @@ goog.module.ModuleLoader.LoadStatus = function(trustedRequestUris) {
  */
 goog.module.ModuleLoader.LoadStatus.createForIds_ = function(
     ids, moduleInfoMap) {
+  'use strict';
   if (!ids) {
     return new goog.module.ModuleLoader.LoadStatus([]);
   }

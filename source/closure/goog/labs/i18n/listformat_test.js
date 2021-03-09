@@ -1,16 +1,12 @@
-// Copyright 2013 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @fileoverview
+ * @suppress {missingRequire} TODO(user): this shouldn't be needed
+ */
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 goog.module('goog.labs.i18n.ListFormatTest');
 goog.setTestOnly();
@@ -62,6 +58,9 @@ testSuite({
   },
 
   testListFormatterFrench() {
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_fr;
 
     const fmt = new ListFormat();
@@ -72,16 +71,28 @@ testSuite({
         'One, Two, Three, Four, Five et Six',
         fmt.format(['One', 'Two', 'Three', 'Four', 'Five', 'Six']));
 
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
   },
 
   // Malayalam and Zulu are the only two locales with pathers
   // different than '{0} sometext {1}'
   testListFormatterSpecialLanguages() {
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_ml;
     const fmt_ml = new ListFormat();
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_zu;
     const fmt_zu = new ListFormat();
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
 
     // Only the end pattern is special with Malayalam
@@ -109,6 +120,9 @@ testSuite({
   testListGendersNeutral() {
     const Gender = GenderInfo.Gender;
 
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
     const listGen = new GenderInfo();
 
@@ -159,8 +173,14 @@ testSuite({
   testListGendersMaleTaints() {
     const Gender = GenderInfo.Gender;
 
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_fr;
     const listGen = new GenderInfo();
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
 
     assertEquals(Gender.MALE, listGen.getListGender([Gender.MALE]));
@@ -210,8 +230,14 @@ testSuite({
   testListGendersMixedNeutral() {
     const Gender = GenderInfo.Gender;
 
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_el;
     const listGen = new GenderInfo();
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
 
     assertEquals(Gender.MALE, listGen.getListGender([Gender.MALE]));
@@ -263,8 +289,14 @@ testSuite({
 
     // Using French because with English the results are mostly Gender.OTHER
     // so we can detect fewer problems
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_fr;
     const listGen = new GenderInfo();
+    /**
+     * @suppress {constantProperty} suppression added to enable type checking
+     */
     goog.labs.i18n.ListFormatSymbols = ListFormatSymbols_en;
 
     // Anynymous Arrays

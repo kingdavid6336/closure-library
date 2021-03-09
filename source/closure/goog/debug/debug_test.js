@@ -140,7 +140,7 @@ testSuite({
     const err = debug.normalizeErrorObject(10);
 
     assertEquals('UnknownError', err.name);
-    assertEquals('Unknown Error of type "Number"', err.message);
+    assertEquals('Unknown Error of type "Number": 10', err.message);
   },
 
   testNormalizeErrorObject_nonErrorObject() {
@@ -161,6 +161,7 @@ testSuite({
     const TestClass = function(text) {
       this.text = text;
     };
+    /** @suppress {checkTypes} suppression added to enable type checking */
     const instance = new TestClass('abc');
     const err = debug.normalizeErrorObject(instance);
 
@@ -175,4 +176,16 @@ testSuite({
       assertEquals('Unknown Error of type "[Anonymous]"', err.message);
     }
   },
+
+  testNormalizeErrorObject_objectWithToString() {
+    const err = debug.normalizeErrorObject({
+      toString: function() {
+        return 'Error Message';
+      }
+    });
+
+    assertEquals('UnknownError', err.name);
+    assertEquals('Unknown Error of type "Object": Error Message', err.message);
+  },
+
 });

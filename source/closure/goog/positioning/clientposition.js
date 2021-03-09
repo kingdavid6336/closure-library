@@ -16,6 +16,8 @@ goog.require('goog.math.Coordinate');
 goog.require('goog.positioning');
 goog.require('goog.positioning.AbstractPosition');
 goog.require('goog.style');
+goog.requireType('goog.math.Box');
+goog.requireType('goog.math.Size');
 
 
 
@@ -33,6 +35,7 @@ goog.require('goog.style');
  * @extends {goog.positioning.AbstractPosition}
  */
 goog.positioning.ClientPosition = function(arg1, opt_arg2) {
+  'use strict';
   /**
    * Coordinate to position popup at.
    * @type {!goog.math.Coordinate}
@@ -59,6 +62,7 @@ goog.inherits(
  */
 goog.positioning.ClientPosition.prototype.reposition = function(
     movableElement, movableElementCorner, opt_margin, opt_preferredSize) {
+  'use strict';
   goog.asserts.assert(movableElement);
 
   // Translates the coordinate to be relative to the page.

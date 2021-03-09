@@ -55,6 +55,44 @@ function setDefault(fn) {
   getDefault = fn;
 }
 
+/**
+ * Method called just before module code is loaded.
+ * @param {string} id Identifier of the module.
+ */
+function beforeLoadModuleCode(id) {
+  if (moduleManager) {
+    moduleManager.beforeLoadModuleCode(id);
+  }
+}
+
+/**
+ * Records that the currently loading module was loaded. Also initiates loading
+ * the next module if any module requests are queued. This method is called by
+ * code that is generated and appended to each dynamic module's code at
+ * compilation time.
+ */
+function setLoaded() {
+  if (moduleManager) {
+    moduleManager.setLoaded();
+  }
+}
+
+/**
+ * Initialize the module manager.
+ * @param {string=} info A string representation of the module dependency
+ *      graph, in the form: module1:dep1,dep2/module2:dep1,dep2 etc.
+ *     Where depX is the base-36 encoded position of the dep in the module list.
+ * @param {!Array<string>=} loadingModuleIds A list of moduleIds that
+ *     are currently being loaded.
+ */
+function maybeInitialize(info, loadingModuleIds) {
+  if (!moduleManager) {
+    if (!getDefault) return;
+    moduleManager = getDefault();
+  }
+  moduleManager.setAllModuleInfoString(info, loadingModuleIds);
+}
+
 /** Test-only method for removing the active module manager. */
 const reset = function() {
   moduleManager = null;
@@ -64,5 +102,8 @@ exports = {
   get,
   set,
   setDefault,
+  beforeLoadModuleCode,
+  setLoaded,
+  maybeInitialize,
   reset,
 };

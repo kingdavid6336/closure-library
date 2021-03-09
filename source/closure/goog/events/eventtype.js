@@ -6,6 +6,7 @@
 
 /**
  * @fileoverview Event Types.
+ * @suppress {missingRequire} TODO(user): this shouldn't be needed
  */
 
 
@@ -25,10 +26,10 @@ goog.require('goog.userAgent');
  * Returns a prefixed event name for the current browser.
  * @param {string} eventName The name of the event.
  * @return {string} The prefixed event name.
- * @suppress {missingRequire|missingProvide}
  * @private
  */
 goog.events.getVendorPrefixedName_ = function(eventName) {
+  'use strict';
   return goog.userAgent.WEBKIT ?
       'webkit' + eventName :
       (goog.userAgent.OPERA ? 'o' + eventName.toLowerCase() :
@@ -197,16 +198,12 @@ goog.events.EventType = {
   CONTROLLERCHANGE: 'controllerchange',
 
   // CSS animation events.
-  /** @suppress {missingRequire} */
   ANIMATIONSTART: goog.events.getVendorPrefixedName_('AnimationStart'),
-  /** @suppress {missingRequire} */
   ANIMATIONEND: goog.events.getVendorPrefixedName_('AnimationEnd'),
-  /** @suppress {missingRequire} */
   ANIMATIONITERATION: goog.events.getVendorPrefixedName_('AnimationIteration'),
 
   // CSS transition events. Based on the browser support described at:
   // https://developer.mozilla.org/en/css/css_transitions#Browser_compatibility
-  /** @suppress {missingRequire} */
   TRANSITIONEND: goog.events.getVendorPrefixedName_('TransitionEnd'),
 
   // W3C Pointer Events
@@ -309,6 +306,7 @@ goog.events.EventType = {
  */
 goog.events.getPointerFallbackEventName_ = function(
     pointerEventName, msPointerEventName, fallbackEventName) {
+  'use strict';
   if (goog.events.BrowserFeature.POINTER_EVENTS) {
     return pointerEventName;
   }

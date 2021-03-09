@@ -14,6 +14,8 @@ goog.provide('goog.html.flash');
 
 goog.require('goog.asserts');
 goog.require('goog.html.SafeHtml');
+goog.requireType('goog.html.TrustedResourceUrl');
+goog.requireType('goog.string.TypedString');
 
 
 /**
@@ -58,6 +60,7 @@ goog.html.flash.FORBIDDEN_ATTRS_AND_PARAMS_ON_FLASH_ = [
  *     to fixed values, documented above, or contains src.
  */
 goog.html.flash.createEmbed = function(src, opt_attributes) {
+  'use strict';
   var fixedAttributes = {
     'src': src,
     'type': 'application/x-shockwave-flash',
@@ -103,6 +106,7 @@ goog.html.flash.createEmbed = function(src, opt_attributes) {
  *     contains classid, data or movie.
  */
 goog.html.flash.createObject = function(data, opt_params, opt_attributes) {
+  'use strict';
   goog.html.flash.verifyKeysNotInMaps(
       goog.html.flash.FORBIDDEN_ATTRS_AND_PARAMS_ON_FLASH_, opt_attributes,
       opt_params);
@@ -151,6 +155,7 @@ goog.html.flash.createObject = function(data, opt_params, opt_attributes) {
  */
 goog.html.flash.createObjectForOldIe = function(
     movie, opt_params, opt_attributes) {
+  'use strict';
   goog.html.flash.verifyKeysNotInMaps(
       goog.html.flash.FORBIDDEN_ATTRS_AND_PARAMS_ON_FLASH_, opt_attributes,
       opt_params);
@@ -179,26 +184,34 @@ goog.html.flash.createObjectForOldIe = function(
  * @package
  */
 goog.html.flash.combineParams = function(defaultParams, opt_params) {
+  'use strict';
   var combinedParams = {};
   var name;
 
   for (name in defaultParams) {
-    goog.asserts.assert(name.toLowerCase() == name, 'Must be lower case');
-    combinedParams[name] = defaultParams[name];
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty#Using_hasOwnProperty_as_a_property_name
+    if (Object.prototype.hasOwnProperty.call(defaultParams, name)) {
+      goog.asserts.assert(name.toLowerCase() == name, 'Must be lower case');
+      combinedParams[name] = defaultParams[name];
+    }
   }
   for (name in opt_params) {
-    var nameLower = name.toLowerCase();
-    if (nameLower in defaultParams) {
-      delete combinedParams[nameLower];
+    if (Object.prototype.hasOwnProperty.call(opt_params, name)) {
+      var nameLower = name.toLowerCase();
+      if (nameLower in defaultParams) {
+        delete combinedParams[nameLower];
+      }
+      combinedParams[name] = opt_params[name];
     }
-    combinedParams[name] = opt_params[name];
   }
 
   var paramTags = [];
   for (name in combinedParams) {
-    paramTags.push(
-        goog.html.SafeHtml.createSafeHtmlTagSecurityPrivateDoNotAccessOrElse(
-            'param', {'name': name, 'value': combinedParams[name]}));
+    if (Object.prototype.hasOwnProperty.call(combinedParams, name)) {
+      paramTags.push(
+          goog.html.SafeHtml.createSafeHtmlTagSecurityPrivateDoNotAccessOrElse(
+              'param', {'name': name, 'value': combinedParams[name]}));
+    }
   }
   return paramTags;
 };
@@ -217,16 +230,21 @@ goog.html.flash.combineParams = function(defaultParams, opt_params) {
  */
 goog.html.flash.verifyKeysNotInMaps = function(
     keys, opt_attributes, opt_params) {
+  'use strict';
   var verifyNotInMap = function(keys, map, type) {
+    'use strict';
     for (var keyMap in map) {
-      var keyMapLower = keyMap.toLowerCase();
-      for (var i = 0; i < keys.length; i++) {
-        var keyToCheck = keys[i];
-        goog.asserts.assert(keyToCheck.toLowerCase() == keyToCheck);
-        if (keyMapLower == keyToCheck) {
-          throw new Error(
-              'Cannot override "' + keyToCheck + '" ' + type + ', got "' +
-              keyMap + '" with value "' + map[keyMap] + '"');
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty#Using_hasOwnProperty_as_a_property_name
+      if (Object.prototype.hasOwnProperty.call(map, keyMap)) {
+        var keyMapLower = keyMap.toLowerCase();
+        for (var i = 0; i < keys.length; i++) {
+          var keyToCheck = keys[i];
+          goog.asserts.assert(keyToCheck.toLowerCase() == keyToCheck);
+          if (keyMapLower == keyToCheck) {
+            throw new Error(
+                'Cannot override "' + keyToCheck + '" ' + type + ', got "' +
+                keyMap + '" with value "' + map[keyMap] + '"');
+          }
         }
       }
     }

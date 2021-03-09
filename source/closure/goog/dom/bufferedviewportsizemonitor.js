@@ -15,6 +15,7 @@
  *   the last buffered dispatch.
  * You likely only need to listen to one of the three events.  But if you need
  * more, just be cautious of duplicating effort.
+ * @suppress {missingRequire} TODO(user): this shouldn't be needed
  */
 
 goog.provide('goog.dom.BufferedViewportSizeMonitor');
@@ -24,6 +25,8 @@ goog.require('goog.async.Delay');
 goog.require('goog.events');
 goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
+goog.requireType('goog.dom');
+goog.requireType('goog.math.Size');
 
 
 
@@ -39,6 +42,7 @@ goog.require('goog.events.EventType');
  */
 goog.dom.BufferedViewportSizeMonitor = function(
     viewportSizeMonitor, opt_bufferMs) {
+  'use strict';
   goog.dom.BufferedViewportSizeMonitor.base(this, 'constructor');
 
   /**
@@ -103,6 +107,7 @@ goog.dom.BufferedViewportSizeMonitor.RESIZE_EVENT_DELAY_MS_ = 100;
 
 /** @override */
 goog.dom.BufferedViewportSizeMonitor.prototype.disposeInternal = function() {
+  'use strict';
   goog.events.unlistenByKey(this.listenerKey_);
   goog.dom.BufferedViewportSizeMonitor.base(this, 'disposeInternal');
 };
@@ -113,6 +118,7 @@ goog.dom.BufferedViewportSizeMonitor.prototype.disposeInternal = function() {
  * @private
  */
 goog.dom.BufferedViewportSizeMonitor.prototype.handleResize_ = function() {
+  'use strict';
   // Lazily create when needed.
   if (!this.resizeDelay_) {
     this.resizeDelay_ =
@@ -128,6 +134,7 @@ goog.dom.BufferedViewportSizeMonitor.prototype.handleResize_ = function() {
  * @private
  */
 goog.dom.BufferedViewportSizeMonitor.prototype.onWindowResize_ = function() {
+  'use strict';
   if (this.viewportSizeMonitor_.isDisposed()) {
     return;
   }
@@ -178,5 +185,6 @@ goog.dom.BufferedViewportSizeMonitor.prototype.onWindowResize_ = function() {
  * @return {goog.math.Size?} The current viewport size.
  */
 goog.dom.BufferedViewportSizeMonitor.prototype.getSize = function() {
+  'use strict';
   return this.currentSize_ ? this.currentSize_.clone() : null;
 };

@@ -1,16 +1,8 @@
-// Copyright 2008 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview A default implementation for managing JavaScript code modules.
@@ -24,7 +16,7 @@ goog.provide('goog.module.ModuleManager.FailureType');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.async.Deferred');
-goog.require('goog.debug.Trace');
+goog.require('goog.debug.Error');
 goog.require('goog.disposable.IDisposable');
 goog.require('goog.disposeAll');
 goog.require('goog.loader.AbstractModuleManager');
@@ -34,7 +26,9 @@ goog.require('goog.log');
 goog.require('goog.module');
 goog.require('goog.module.ModuleInfo');
 goog.require('goog.module.ModuleLoadCallback');
+goog.require('goog.module.ModuleLoadFailureType');
 goog.require('goog.object');
+goog.requireType('goog.module.AbstractModuleLoader');
 
 
 /**
@@ -46,6 +40,7 @@ goog.require('goog.object');
  * @struct
  */
 goog.module.ModuleManager = function() {
+  'use strict';
   goog.module.ModuleManager.base(this, 'constructor');
 
   /**
@@ -98,6 +93,12 @@ goog.module.ModuleManager = function() {
    * @private
    */
   this.userInitiatedLoadingModuleIds_ = [];
+
+  /**
+   * @private @const {!goog.module.AbstractModuleLoader.ExtraEdgesMap} Map of
+   *     extra edges to traverse in the module graph
+   */
+  this.extraEdges_ = {};
 
   /**
    * A map of callback types to the functions to call for the specified
@@ -164,13 +165,6 @@ goog.module.ModuleManager = function() {
    */
   this.concurrentLoadingEnabled_ = false;
 
-  // TODO(user): Remove tracer.
-  /**
-   * Tracer that measures how long it takes to load a module.
-   * @private {?number}
-   */
-  this.loadTracer_ = null;
-
   /**
    * The number of consecutive failures that have happened upon module load
    * requests.
@@ -202,6 +196,29 @@ goog.inherits(goog.module.ModuleManager, goog.loader.AbstractModuleManager);
 
 
 /**
+ * Error used to indicate a module has failed.
+ *
+ * @param {string} moduleID The id of the module that didn't load.
+ * @param {?goog.loader.AbstractModuleManager.FailureType} failureType
+ * @constructor
+ * @extends {goog.debug.Error}
+ * @final
+ */
+goog.module.ModuleManager.ModuleFailureError = function(moduleID, failureType) {
+  'use strict';
+  /** @type {string} */
+  const msg = `Error loading ${moduleID}: ${
+      goog.module.ModuleLoadFailureType.getReadableError(failureType)}`;
+
+  goog.module.ModuleManager.ModuleFailureError.base(this, 'constructor', msg);
+
+  /** @type {?goog.loader.AbstractModuleManager.FailureType} */
+  this.failureType = failureType;
+};
+goog.inherits(goog.module.ModuleManager.ModuleFailureError, goog.debug.Error);
+
+
+/**
  * The type of callbacks that can be registered with the module manager,.
  * @enum {string}
  */
@@ -213,8 +230,7 @@ goog.module.ModuleManager.CallbackType =
  * The possible reasons for a module load failure callback being fired.
  * @enum {number}
  */
-goog.module.ModuleManager.FailureType =
-    goog.loader.AbstractModuleManager.FailureType;
+goog.module.ModuleManager.FailureType = goog.module.ModuleLoadFailureType;
 
 
 /**
@@ -232,12 +248,14 @@ goog.module.ModuleManager.CORRUPT_RESPONSE_STATUS_CODE =
 
 /** @return {!goog.loader.AbstractModuleManager} */
 goog.module.ModuleManager.getInstance = function() {
+  'use strict';
   return goog.loader.activeModuleManager.get();
 };
 
 
 /** @override */
 goog.module.ModuleManager.prototype.setBatchModeEnabled = function(enabled) {
+  'use strict';
   this.batchModeEnabled_ = enabled;
 };
 
@@ -245,14 +263,16 @@ goog.module.ModuleManager.prototype.setBatchModeEnabled = function(enabled) {
 /** @override */
 goog.module.ModuleManager.prototype.setConcurrentLoadingEnabled = function(
     enabled) {
+  'use strict';
   this.concurrentLoadingEnabled_ = enabled;
 };
 
 
 /** @override */
 goog.module.ModuleManager.prototype.setAllModuleInfo = function(infoMap) {
+  'use strict';
   for (var id in infoMap) {
-    this.moduleInfoMap[id] = new goog.module.ModuleInfo(infoMap[id], id);
+    this.addOrUpdateModuleInfo_(id, infoMap[id]);
   }
   if (!this.initialModulesLoaded_.hasFired()) {
     this.initialModulesLoaded_.callback();
@@ -264,6 +284,7 @@ goog.module.ModuleManager.prototype.setAllModuleInfo = function(infoMap) {
 /** @override */
 goog.module.ModuleManager.prototype.setAllModuleInfoString = function(
     opt_info, opt_loadingModuleIds) {
+  'use strict';
   // Check for legacy direct-from-prototype usage.
   if (!(this instanceof goog.module.ModuleManager)) {
     this.setAllModuleInfoString(opt_info, opt_loadingModuleIds);
@@ -297,7 +318,7 @@ goog.module.ModuleManager.prototype.setAllModuleInfoString = function(
       deps = [];
     }
     moduleIds.push(id);
-    this.moduleInfoMap[id] = new goog.module.ModuleInfo(deps, id);
+    this.addOrUpdateModuleInfo_(id, deps);
   }
   if (opt_loadingModuleIds && opt_loadingModuleIds.length) {
     goog.array.extend(this.loadingModuleIds_, opt_loadingModuleIds);
@@ -313,16 +334,60 @@ goog.module.ModuleManager.prototype.setAllModuleInfoString = function(
   this.maybeFinishBaseLoad_();
 };
 
+/**
+ * @define {boolean} Whether subtractive module loading is enabled. The main
+ * difference is the module graph is no longer in the client, i.e.,
+ * setAllModuleInfoString is never been called. Instead, the module manager
+ * will keep track of the already loaded modules, and add them to the subsequent
+ * loader requests. The serving system is able to figure out the list of desired
+ * modules.
+ *
+ * The default is false, but new code is encouraged to use this.
+ * Search, Gmail, and many Google applications has been using subtractive
+ * module loading for years and see significantly performance benefits.
+ */
+goog.module.ModuleManager.SUBTRACTIVE_MODULE_LOADING =
+    goog.define('goog.module.ModuleManager.SUBTRACTIVE_MODULE_LOADING', false);
 
 /** @override */
 goog.module.ModuleManager.prototype.getModuleInfo = function(id) {
+  'use strict';
+  if (goog.module.ModuleManager.SUBTRACTIVE_MODULE_LOADING &&
+      !(id in this.moduleInfoMap)) {
+    this.moduleInfoMap[id] = new goog.module.ModuleInfo([], id);
+  }
   return this.moduleInfoMap[id];
+};
+
+
+/** @override */
+goog.module.ModuleManager.prototype.addExtraEdge = function(
+    fromModule, toModule) {
+  'use strict';
+  if (!this.getLoader().supportsExtraEdges) {
+    throw new Error('Extra edges are not supported by the module loader.');
+  }
+  if (!this.extraEdges_[fromModule]) {
+    this.extraEdges_[fromModule] = {};
+  }
+  this.extraEdges_[fromModule][toModule] = true;
+};
+
+/** @override */
+goog.module.ModuleManager.prototype.removeExtraEdge = function(
+    fromModule, toModule) {
+  'use strict';
+  if (!this.extraEdges_[fromModule]) {
+    return;
+  }
+  delete this.extraEdges_[fromModule][toModule];
 };
 
 
 /** @override */
 goog.module.ModuleManager.prototype.setModuleTrustedUris = function(
     moduleUriMap) {
+  'use strict';
   for (var id in moduleUriMap) {
     this.moduleInfoMap[id].setTrustedUris(moduleUriMap[id]);
   }
@@ -331,6 +396,7 @@ goog.module.ModuleManager.prototype.setModuleTrustedUris = function(
 
 /** @override */
 goog.module.ModuleManager.prototype.setModuleContext = function(context) {
+  'use strict';
   goog.module.ModuleManager.base(this, 'setModuleContext', context);
   this.maybeFinishBaseLoad_();
 };
@@ -338,12 +404,14 @@ goog.module.ModuleManager.prototype.setModuleContext = function(context) {
 
 /** @override */
 goog.module.ModuleManager.prototype.isActive = function() {
+  'use strict';
   return this.loadingModuleIds_.length > 0;
 };
 
 
 /** @override */
 goog.module.ModuleManager.prototype.isUserActive = function() {
+  'use strict';
   return this.userInitiatedLoadingModuleIds_.length > 0;
 };
 
@@ -354,6 +422,7 @@ goog.module.ModuleManager.prototype.isUserActive = function() {
  */
 goog.module.ModuleManager.prototype.dispatchActiveIdleChangeIfNeeded_ =
     function() {
+  'use strict';
   var lastActive = this.lastActive_;
   var active = this.isActive();
   if (active != lastActive) {
@@ -383,6 +452,7 @@ goog.module.ModuleManager.prototype.dispatchActiveIdleChangeIfNeeded_ =
 
 /** @override */
 goog.module.ModuleManager.prototype.preloadModule = function(id, opt_timeout) {
+  'use strict';
   var d = new goog.async.Deferred();
   window.setTimeout(
       goog.bind(this.addLoadModule_, this, id, d), opt_timeout || 0);
@@ -392,6 +462,7 @@ goog.module.ModuleManager.prototype.preloadModule = function(id, opt_timeout) {
 
 /** @override */
 goog.module.ModuleManager.prototype.prefetchModule = function(id) {
+  'use strict';
   var moduleInfo = this.getModuleInfo(id);
   if (moduleInfo.isLoaded() || this.isModuleLoading(id)) {
     throw new Error('Module load already requested: ' + id);
@@ -415,6 +486,7 @@ goog.module.ModuleManager.prototype.prefetchModule = function(id) {
  * @private
  */
 goog.module.ModuleManager.prototype.addLoadModule_ = function(id, d) {
+  'use strict';
   var moduleInfo = this.getModuleInfo(id);
   if (moduleInfo.isLoaded()) {
     d.callback(this.getModuleContext());
@@ -429,10 +501,33 @@ goog.module.ModuleManager.prototype.addLoadModule_ = function(id, d) {
 
 
 /**
- * Loads a list of modules or, if some other module is currently being loaded,
- * appends the ids to the queue of requested module ids. Registers callbacks a
- * module that is currently loading and returns a fired deferred for a module
- * that is already loaded.
+ * Updates the module info map with either a new ModuleInfo instance or by doing
+ * an in-place update of the dependencies to persist the existing loaded state
+ * and registered callbacks.
+ *
+ * @param {string} id
+ * @param {!Array<string>} deps
+ * @private
+ */
+goog.module.ModuleManager.prototype.addOrUpdateModuleInfo_ = function(
+    id, deps) {
+  'use strict';
+  if (this.moduleInfoMap[id]) {
+    const moduleDeps = this.moduleInfoMap[id].getDependencies();
+    if (moduleDeps != deps) {
+      moduleDeps.splice(0, moduleDeps.length, ...deps);
+    }
+  } else {
+    this.moduleInfoMap[id] = new goog.module.ModuleInfo(deps, id);
+  }
+};
+
+
+/**
+ * Loads a list of modules or, if some other module is currently being
+ * loaded, appends the ids to the queue of requested module ids. Registers
+ * callbacks a module that is currently loading and returns a fired deferred
+ * for a module that is already loaded.
  *
  * @param {!Array<string>} ids The id of the module to load.
  * @param {boolean=} opt_userInitiated If the load is a result of a user action.
@@ -443,6 +538,7 @@ goog.module.ModuleManager.prototype.addLoadModule_ = function(id, d) {
  */
 goog.module.ModuleManager.prototype.loadModulesOrEnqueueIfNotLoadedOrLoading_ =
     function(ids, opt_userInitiated) {
+  'use strict';
   var uniqueIds = [];
   goog.array.removeDuplicates(ids, uniqueIds);
   var idsToLoad = [];
@@ -487,9 +583,11 @@ goog.module.ModuleManager.prototype.loadModulesOrEnqueueIfNotLoadedOrLoading_ =
  */
 goog.module.ModuleManager.prototype.registerModuleLoadCallbacks_ = function(
     id, moduleInfo, userInitiated, d) {
+  'use strict';
   moduleInfo.registerCallback(d.callback, d);
   moduleInfo.registerErrback(function(err) {
-    d.errback(Error(err));
+    'use strict';
+    d.errback(new goog.module.ModuleManager.ModuleFailureError(id, err));
   });
   // If it's already loading, we don't have to do anything besides handle
   // if it was user initiated
@@ -523,6 +621,7 @@ goog.module.ModuleManager.prototype.registerModuleLoadCallbacks_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.loadModulesOrEnqueue_ = function(ids) {
+  'use strict';
   // With concurrent loading we always just send off the request.
   if (this.concurrentLoadingEnabled_) {
     // For now we wait for initial modules to have downloaded as this puts the
@@ -549,6 +648,7 @@ goog.module.ModuleManager.prototype.loadModulesOrEnqueue_ = function(ids) {
  * @private
  */
 goog.module.ModuleManager.prototype.getBackOff_ = function() {
+  'use strict';
   // 5 seconds after one error, 20 seconds after 2.
   return Math.pow(this.consecutiveFailures_, 2) * 5000;
 };
@@ -571,6 +671,7 @@ goog.module.ModuleManager.prototype.getBackOff_ = function() {
  */
 goog.module.ModuleManager.prototype.loadModules_ = function(
     ids, opt_isRetry, opt_forceReload) {
+  'use strict';
   if (!opt_isRetry) {
     this.consecutiveFailures_ = 0;
   }
@@ -609,11 +710,14 @@ goog.module.ModuleManager.prototype.loadModules_ = function(
   var loadFn = goog.bind(
       this.getLoader().loadModules, goog.asserts.assert(this.getLoader()),
       goog.array.clone(idsToLoadImmediately),
-      goog.asserts.assert(this.moduleInfoMap), null,
-      goog.bind(
-          this.handleLoadError_, this, this.requestedLoadingModuleIds_,
-          idsToLoadImmediately),
-      goog.bind(this.handleLoadTimeout_, this), !!opt_forceReload);
+      goog.asserts.assert(this.moduleInfoMap), {
+        extraEdges: this.extraEdges_,
+        forceReload: !!opt_forceReload,
+        onError: goog.bind(
+            this.handleLoadError_, this, this.requestedLoadingModuleIds_,
+            idsToLoadImmediately),
+        onTimeout: goog.bind(this.handleLoadTimeout_, this),
+      });
 
   var delay = this.getBackOff_();
   if (delay) {
@@ -635,6 +739,7 @@ goog.module.ModuleManager.prototype.loadModules_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.processModulesForLoad_ = function(ids) {
+  'use strict';
   ids = goog.array.filter(ids, (id) => {
     let moduleInfo = this.moduleInfoMap[id];
     if (moduleInfo.isLoaded()) {
@@ -662,6 +767,7 @@ goog.module.ModuleManager.prototype.processModulesForLoad_ = function(ids) {
     // Insert the requested module id and any other not-yet-loaded prereqs
     // that it has at the front of the queue.
     var queuedModules = goog.array.map(idsWithDeps, function(id) {
+      'use strict';
       return [id];
     });
     this.requestedModuleIdsQueue_ =
@@ -684,6 +790,7 @@ goog.module.ModuleManager.prototype.processModulesForLoad_ = function(ids) {
  */
 goog.module.ModuleManager.prototype.getNotYetLoadedTransitiveDepIds_ = function(
     id) {
+  'use strict';
   var requestedModuleSet = goog.object.createSet(this.requestedModuleIds_);
   // NOTE(user): We want the earliest occurrence of a module, not the first
   // dependency we find. Therefore we strip duplicates at the end rather than
@@ -719,6 +826,7 @@ goog.module.ModuleManager.prototype.getNotYetLoadedTransitiveDepIds_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.maybeFinishBaseLoad_ = function() {
+  'use strict';
   if (this.currentlyLoadingModule_ == this.baseModuleInfo_) {
     this.currentlyLoadingModule_ = null;
     var error =
@@ -735,6 +843,7 @@ goog.module.ModuleManager.prototype.maybeFinishBaseLoad_ = function() {
 
 /** @override */
 goog.module.ModuleManager.prototype.setLoaded = function() {
+  'use strict';
   if (!this.currentlyLoadingModule_) {
     goog.log.error(
         this.logger_, 'setLoaded called while no module is actively loading');
@@ -780,12 +889,12 @@ goog.module.ModuleManager.prototype.setLoaded = function() {
   this.dispatchActiveIdleChangeIfNeeded_();
 
   this.currentlyLoadingModule_ = null;
-  goog.debug.Trace.stopTracer(this.loadTracer_);
 };
 
 
 /** @override */
 goog.module.ModuleManager.prototype.isModuleLoading = function(id) {
+  'use strict';
   if (goog.array.contains(this.loadingModuleIds_, id)) {
     return true;
   }
@@ -802,6 +911,7 @@ goog.module.ModuleManager.prototype.isModuleLoading = function(id) {
 goog.module.ModuleManager.prototype.execOnLoad = function(
     moduleId, fn, opt_handler, opt_noLoad, opt_userInitiated,
     opt_preferSynchronous) {
+  'use strict';
   var moduleInfo = this.moduleInfoMap[moduleId];
   var callbackWrapper;
 
@@ -843,6 +953,7 @@ goog.module.ModuleManager.prototype.execOnLoad = function(
 /** @override */
 goog.module.ModuleManager.prototype.load = function(
     moduleId, opt_userInitiated) {
+  'use strict';
   return this.loadModulesOrEnqueueIfNotLoadedOrLoading_(
       [moduleId], opt_userInitiated)[moduleId];
 };
@@ -851,6 +962,7 @@ goog.module.ModuleManager.prototype.load = function(
 /** @override */
 goog.module.ModuleManager.prototype.loadMultiple = function(
     moduleIds, opt_userInitiated) {
+  'use strict';
   return this.loadModulesOrEnqueueIfNotLoadedOrLoading_(
       moduleIds, opt_userInitiated);
 };
@@ -865,6 +977,7 @@ goog.module.ModuleManager.prototype.loadMultiple = function(
  */
 goog.module.ModuleManager.prototype.addUserInitiatedLoadingModule_ = function(
     id) {
+  'use strict';
   if (!goog.array.contains(this.userInitiatedLoadingModuleIds_, id)) {
     this.userInitiatedLoadingModuleIds_.push(id);
   }
@@ -873,8 +986,7 @@ goog.module.ModuleManager.prototype.addUserInitiatedLoadingModule_ = function(
 
 /** @override */
 goog.module.ModuleManager.prototype.beforeLoadModuleCode = function(id) {
-  this.loadTracer_ =
-      goog.debug.Trace.startTracer('Module Load: ' + id, 'Module Load');
+  'use strict';
   if (this.currentlyLoadingModule_) {
     goog.log.error(
         this.logger_,
@@ -888,6 +1000,7 @@ goog.module.ModuleManager.prototype.beforeLoadModuleCode = function(id) {
 /** @override */
 goog.module.ModuleManager.prototype.registerInitializationCallback = function(
     fn, opt_handler) {
+  'use strict';
   if (!this.currentlyLoadingModule_) {
     goog.log.error(this.logger_, 'No module is currently loading');
   } else {
@@ -899,6 +1012,7 @@ goog.module.ModuleManager.prototype.registerInitializationCallback = function(
 /** @override */
 goog.module.ModuleManager.prototype.registerLateInitializationCallback =
     function(fn, opt_handler) {
+  'use strict';
   if (!this.currentlyLoadingModule_) {
     goog.log.error(this.logger_, 'No module is currently loading');
   } else {
@@ -909,6 +1023,7 @@ goog.module.ModuleManager.prototype.registerLateInitializationCallback =
 
 /** @override */
 goog.module.ModuleManager.prototype.setModuleConstructor = function(fn) {
+  'use strict';
   if (!this.currentlyLoadingModule_) {
     goog.log.error(this.logger_, 'No module is currently loading');
     return;
@@ -929,6 +1044,7 @@ goog.module.ModuleManager.prototype.setModuleConstructor = function(fn) {
  */
 goog.module.ModuleManager.prototype.handleLoadError_ = function(
     requestedLoadingModuleIds, requestedModuleIdsWithDeps, status) {
+  'use strict';
   this.consecutiveFailures_++;
   // Module manager was not designed to be reentrant. Reinstate the instance
   // var with actual value when request failed (Other requests may have
@@ -975,6 +1091,7 @@ goog.module.ModuleManager.prototype.handleLoadError_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.handleLoadTimeout_ = function() {
+  'use strict';
   goog.log.info(
       this.logger_, 'Aborting after timeout: ' + this.loadingModuleIds_);
   this.requeueBatchOrDispatchFailure_(
@@ -994,12 +1111,14 @@ goog.module.ModuleManager.prototype.handleLoadTimeout_ = function() {
  */
 goog.module.ModuleManager.prototype.requeueBatchOrDispatchFailure_ = function(
     cause) {
+  'use strict';
   // The load failed, so if there are more than one requested modules, then we
   // need to retry each one as a separate load. Otherwise, if there is only one
   // requested module, remove it and its dependencies from the queue.
   if (this.requestedLoadingModuleIds_.length > 1) {
     var queuedModules =
         goog.array.map(this.requestedLoadingModuleIds_, function(id) {
+          'use strict';
           return [id];
         });
     this.requestedModuleIdsQueue_ =
@@ -1018,6 +1137,7 @@ goog.module.ModuleManager.prototype.requeueBatchOrDispatchFailure_ = function(
  */
 goog.module.ModuleManager.prototype.dispatchModuleLoadFailed_ = function(
     cause) {
+  'use strict';
   var failedIds = this.requestedLoadingModuleIds_;
   this.loadingModuleIds_.length = 0;
   // If any pending modules depend on the id that failed,
@@ -1033,9 +1153,11 @@ goog.module.ModuleManager.prototype.dispatchModuleLoadFailed_ = function(
          * @return {boolean} True if the module depends on failed modules.
          */
         function(requestedId) {
+          'use strict';
           var requestedDeps =
               this.getNotYetLoadedTransitiveDepIds_(requestedId);
           return goog.array.some(failedIds, function(id) {
+            'use strict';
             return goog.array.contains(requestedDeps, id);
           });
         },
@@ -1089,10 +1211,12 @@ goog.module.ModuleManager.prototype.dispatchModuleLoadFailed_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.loadNextModules_ = function() {
+  'use strict';
   while (this.requestedModuleIdsQueue_.length) {
     // Remove modules that are already loaded.
     var nextIds =
         goog.array.filter(this.requestedModuleIdsQueue_.shift(), function(id) {
+          'use strict';
           return !this.getModuleInfo(id).isLoaded();
         }, this);
     if (nextIds.length > 0) {
@@ -1108,6 +1232,7 @@ goog.module.ModuleManager.prototype.loadNextModules_ = function() {
 
 /** @override */
 goog.module.ModuleManager.prototype.registerCallback = function(types, fn) {
+  'use strict';
   if (!Array.isArray(types)) {
     types = [types];
   }
@@ -1126,6 +1251,7 @@ goog.module.ModuleManager.prototype.registerCallback = function(types, fn) {
  * @private
  */
 goog.module.ModuleManager.prototype.registerCallback_ = function(type, fn) {
+  'use strict';
   var callbackMap = this.callbackMap_;
   if (!callbackMap[type]) {
     callbackMap[type] = [];
@@ -1141,6 +1267,7 @@ goog.module.ModuleManager.prototype.registerCallback_ = function(type, fn) {
  * @private
  */
 goog.module.ModuleManager.prototype.executeCallbacks_ = function(type) {
+  'use strict';
   var callbacks = this.callbackMap_[type];
   for (var i = 0; callbacks && i < callbacks.length; i++) {
     callbacks[i](type);
@@ -1150,6 +1277,7 @@ goog.module.ModuleManager.prototype.executeCallbacks_ = function(type) {
 
 /** @override */
 goog.module.ModuleManager.prototype.dispose = function() {
+  'use strict';
   // Dispose of each ModuleInfo object.
   goog.disposeAll(
       goog.object.getValues(this.moduleInfoMap), this.baseModuleInfo_);
@@ -1164,9 +1292,11 @@ goog.module.ModuleManager.prototype.dispose = function() {
 
 /** @override */
 goog.module.ModuleManager.prototype.isDisposed = function() {
+  'use strict';
   return this.isDisposed_;
 };
 
 goog.loader.activeModuleManager.setDefault(function() {
+  'use strict';
   return new goog.module.ModuleManager();
 });

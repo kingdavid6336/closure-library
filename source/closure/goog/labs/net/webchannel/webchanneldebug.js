@@ -1,16 +1,8 @@
-// Copyright 2006 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview Provides a utility for tracing and debugging WebChannel
@@ -36,6 +28,7 @@ goog.requireType('goog.net.XmlHttp.ReadyState');
  * @final
  */
 goog.labs.net.webChannel.WebChannelDebug = function() {
+  'use strict';
   /**
    * The logger instance.
    * @const
@@ -52,6 +45,7 @@ goog.labs.net.webChannel.WebChannelDebug = function() {
 
 
 goog.scope(function() {
+'use strict';
 var WebChannelDebug = goog.labs.net.webChannel.WebChannelDebug;
 
 
@@ -59,6 +53,7 @@ var WebChannelDebug = goog.labs.net.webChannel.WebChannelDebug;
  * Turns off redact.
  */
 WebChannelDebug.prototype.disableRedact = function() {
+  'use strict';
   this.redactEnabled_ = false;
 };
 
@@ -68,7 +63,9 @@ WebChannelDebug.prototype.disableRedact = function() {
  * @param {goog.Uri} url The URL being requested.
  */
 WebChannelDebug.prototype.browserOfflineResponse = function(url) {
+  'use strict';
   this.info(function() {
+    'use strict';
     return 'BROWSER_OFFLINE: ' + url;
   });
 };
@@ -84,8 +81,10 @@ WebChannelDebug.prototype.browserOfflineResponse = function(url) {
  */
 WebChannelDebug.prototype.xmlHttpChannelRequest = function(
     verb, uri, id, attempt, postData) {
+  'use strict';
   var self = this;
   this.info(function() {
+    'use strict';
     return 'XMLHTTP REQ (' + id + ') [attempt ' + attempt + ']: ' + verb +
         '\n' + uri + '\n' + self.maybeRedactPostData_(postData);
   });
@@ -103,7 +102,9 @@ WebChannelDebug.prototype.xmlHttpChannelRequest = function(
  */
 WebChannelDebug.prototype.xmlHttpChannelResponseMetaData = function(
     verb, uri, id, attempt, readyState, statusCode) {
+  'use strict';
   this.info(function() {
+    'use strict';
     return 'XMLHTTP RESP (' + id + ') [ attempt ' + attempt + ']: ' + verb +
         '\n' + uri + '\n' + readyState + ' ' + statusCode;
   });
@@ -118,8 +119,10 @@ WebChannelDebug.prototype.xmlHttpChannelResponseMetaData = function(
  */
 WebChannelDebug.prototype.xmlHttpChannelResponseText = function(
     id, responseText, opt_desc) {
+  'use strict';
   var self = this;
   this.info(function() {
+    'use strict';
     return 'XMLHTTP TEXT (' + id + '): ' + self.redactResponse_(responseText) +
         (opt_desc ? ' ' + opt_desc : '');
   });
@@ -131,7 +134,9 @@ WebChannelDebug.prototype.xmlHttpChannelResponseText = function(
  * @param {goog.Uri} uri The uri that timed out.
  */
 WebChannelDebug.prototype.timeoutResponse = function(uri) {
+  'use strict';
   this.info(function() {
+    'use strict';
     return 'TIMEOUT: ' + uri;
   });
 };
@@ -139,9 +144,10 @@ WebChannelDebug.prototype.timeoutResponse = function(uri) {
 
 /**
  * Logs a debug message.
- * @param {!goog.debug.Loggable} text The message.
+ * @param {!goog.log.Loggable} text The message.
  */
 WebChannelDebug.prototype.debug = function(text) {
+  'use strict';
   goog.log.fine(this.logger_, text);
 };
 
@@ -149,37 +155,41 @@ WebChannelDebug.prototype.debug = function(text) {
 /**
  * Logs an exception
  * @param {Error} e The error or error event.
- * @param {goog.debug.Loggable=} opt_msg The optional message,
+ * @param {goog.log.Loggable=} opt_msg The optional message,
  *     defaults to 'Exception'.
  */
 WebChannelDebug.prototype.dumpException = function(e, opt_msg) {
+  'use strict';
   goog.log.error(this.logger_, opt_msg || 'Exception', e);
 };
 
 
 /**
  * Logs an info message.
- * @param {!goog.debug.Loggable} text The message.
+ * @param {!goog.log.Loggable} text The message.
  */
 WebChannelDebug.prototype.info = function(text) {
+  'use strict';
   goog.log.info(this.logger_, text);
 };
 
 
 /**
  * Logs a warning message.
- * @param {!goog.debug.Loggable} text The message.
+ * @param {!goog.log.Loggable} text The message.
  */
 WebChannelDebug.prototype.warning = function(text) {
+  'use strict';
   goog.log.warning(this.logger_, text);
 };
 
 
 /**
  * Logs a severe message.
- * @param {!goog.debug.Loggable} text The message.
+ * @param {!goog.log.Loggable} text The message.
  */
 WebChannelDebug.prototype.severe = function(text) {
+  'use strict';
   goog.log.error(this.logger_, text);
 };
 
@@ -192,6 +202,7 @@ WebChannelDebug.prototype.severe = function(text) {
  * @private
  */
 WebChannelDebug.prototype.redactResponse_ = function(responseText) {
+  'use strict';
   if (!this.redactEnabled_) {
     return responseText;
   }
@@ -224,6 +235,7 @@ WebChannelDebug.prototype.redactResponse_ = function(responseText) {
  * @private
  */
 WebChannelDebug.prototype.maybeRedactArray_ = function(array) {
+  'use strict';
   if (array.length < 2) {
     return;
   }
@@ -253,6 +265,7 @@ WebChannelDebug.prototype.maybeRedactArray_ = function(array) {
  * @private
  */
 WebChannelDebug.prototype.maybeRedactPostData_ = function(data) {
+  'use strict';
   if (!this.redactEnabled_) {
     return data;
   }

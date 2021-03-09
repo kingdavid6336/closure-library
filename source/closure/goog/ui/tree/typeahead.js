@@ -1,16 +1,8 @@
-// Copyright 2007 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview Provides the typeahead functionality for the tree class.
@@ -19,11 +11,12 @@
 goog.provide('goog.ui.tree.TypeAhead');
 goog.provide('goog.ui.tree.TypeAhead.Offset');
 
-goog.forwardDeclare('goog.ui.tree.BaseNode');
 goog.require('goog.array');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.string');
 goog.require('goog.structs.Trie');
+goog.requireType('goog.events.BrowserEvent');
+goog.requireType('goog.ui.tree.BaseNode');
 
 
 
@@ -33,6 +26,7 @@ goog.require('goog.structs.Trie');
  * @final
  */
 goog.ui.tree.TypeAhead = function() {
+  'use strict';
   /**
    * Map of tree nodes to allow for quick access by characters in the label
    * text.
@@ -92,6 +86,7 @@ goog.ui.tree.TypeAhead.Offset = {
  * @return {boolean} The handled value.
  */
 goog.ui.tree.TypeAhead.prototype.handleNavigation = function(e) {
+  'use strict';
   var handled = false;
 
   switch (e.keyCode) {
@@ -140,6 +135,7 @@ goog.ui.tree.TypeAhead.prototype.handleNavigation = function(e) {
  * @return {boolean} The handled value.
  */
 goog.ui.tree.TypeAhead.prototype.handleTypeAheadChar = function(e) {
+  'use strict';
   var handled = false;
 
   if (!e.ctrlKey && !e.altKey) {
@@ -170,6 +166,7 @@ goog.ui.tree.TypeAhead.prototype.handleTypeAheadChar = function(e) {
  * @param {goog.ui.tree.BaseNode} node Node to be added or updated.
  */
 goog.ui.tree.TypeAhead.prototype.setNodeInMap = function(node) {
+  'use strict';
   var labelText = node.getText();
   if (labelText &&
       !goog.string.isEmptyOrWhitespace(goog.string.makeSafe(labelText))) {
@@ -194,6 +191,7 @@ goog.ui.tree.TypeAhead.prototype.setNodeInMap = function(node) {
  * @param {goog.ui.tree.BaseNode} node Node to be removed.
  */
 goog.ui.tree.TypeAhead.prototype.removeNodeFromMap = function(node) {
+  'use strict';
   var labelText = node.getText();
   if (labelText &&
       !goog.string.isEmptyOrWhitespace(goog.string.makeSafe(labelText))) {
@@ -223,6 +221,7 @@ goog.ui.tree.TypeAhead.prototype.removeNodeFromMap = function(node) {
  * @private
  */
 goog.ui.tree.TypeAhead.prototype.jumpToLabel_ = function(typeAhead) {
+  'use strict';
   var handled = false;
   var labels = this.nodeMap_.getKeys(typeAhead);
 
@@ -249,6 +248,7 @@ goog.ui.tree.TypeAhead.prototype.jumpToLabel_ = function(typeAhead) {
  * @private
  */
 goog.ui.tree.TypeAhead.prototype.jumpTo_ = function(offset) {
+  'use strict';
   var handled = false;
   var labels = this.matchingLabels_;
 
@@ -305,6 +305,7 @@ goog.ui.tree.TypeAhead.prototype.jumpTo_ = function(offset) {
  * @private
  */
 goog.ui.tree.TypeAhead.prototype.selectMatchingNode_ = function(nodes) {
+  'use strict';
   var node;
 
   if (nodes) {
@@ -328,5 +329,6 @@ goog.ui.tree.TypeAhead.prototype.selectMatchingNode_ = function(nodes) {
  * Clears the typeahead buffer.
  */
 goog.ui.tree.TypeAhead.prototype.clear = function() {
+  'use strict';
   this.buffer_ = '';
 };

@@ -13,6 +13,9 @@
 goog.provide('goog.graphics.RectElement');
 
 goog.require('goog.graphics.StrokeAndFillElement');
+goog.requireType('goog.graphics.AbstractGraphics');
+goog.requireType('goog.graphics.Fill');
+goog.requireType('goog.graphics.Stroke');
 
 
 
@@ -32,6 +35,7 @@ goog.require('goog.graphics.StrokeAndFillElement');
  *     http://en.wikipedia.org/wiki/Canvas_element for details.
  */
 goog.graphics.RectElement = function(element, graphics, stroke, fill) {
+  'use strict';
   goog.graphics.StrokeAndFillElement.call(
       this, element, graphics, stroke, fill);
 };

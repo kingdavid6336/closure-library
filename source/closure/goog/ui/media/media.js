@@ -1,16 +1,8 @@
-// Copyright 2009 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview Provides the base goog.ui.Control and goog.ui.ControlRenderer
@@ -93,13 +85,14 @@
 goog.provide('goog.ui.media.Media');
 goog.provide('goog.ui.media.MediaRenderer');
 
-goog.forwardDeclare('goog.ui.media.MediaModel');
 goog.require('goog.asserts');
 goog.require('goog.dom.TagName');
 goog.require('goog.style');
 goog.require('goog.ui.Component');
 goog.require('goog.ui.Control');
 goog.require('goog.ui.ControlRenderer');
+goog.requireType('goog.dom.DomHelper');
+goog.requireType('goog.ui.media.MediaModel');
 
 
 
@@ -117,6 +110,7 @@ goog.require('goog.ui.ControlRenderer');
  * @final
  */
 goog.ui.media.Media = function(dataModel, opt_renderer, opt_domHelper) {
+  'use strict';
   goog.ui.Control.call(this, null, opt_renderer, opt_domHelper);
 
   // Sets up the data model.
@@ -150,6 +144,7 @@ goog.ui.media.Media.prototype.dataModel_;
  *     should use.
  */
 goog.ui.media.Media.prototype.setDataModel = function(dataModel) {
+  'use strict';
   this.dataModel_ = dataModel;
 };
 
@@ -159,6 +154,7 @@ goog.ui.media.Media.prototype.setDataModel = function(dataModel) {
  * @return {goog.ui.media.MediaModel} The media model being used.
  */
 goog.ui.media.Media.prototype.getDataModel = function() {
+  'use strict';
   return this.dataModel_;
 };
 
@@ -185,6 +181,7 @@ goog.ui.media.Media.prototype.getDataModel = function() {
  * @extends {goog.ui.ControlRenderer}
  */
 goog.ui.media.MediaRenderer = function() {
+  'use strict';
   goog.ui.ControlRenderer.call(this);
 };
 goog.inherits(goog.ui.media.MediaRenderer, goog.ui.ControlRenderer);
@@ -201,6 +198,7 @@ goog.inherits(goog.ui.media.MediaRenderer, goog.ui.ControlRenderer);
  * @override
  */
 goog.ui.media.MediaRenderer.prototype.createDom = function(control) {
+  'use strict';
   goog.asserts.assertInstanceof(control, goog.ui.media.Media);
   var domHelper = control.getDomHelper();
   var div = domHelper.createElement(goog.dom.TagName.DIV);
@@ -280,6 +278,7 @@ goog.ui.media.MediaRenderer.prototype.createDom = function(control) {
  * @protected
  */
 goog.ui.media.MediaRenderer.prototype.getThumbnailCssName = function(index) {
+  'use strict';
   switch (index) {
     case 0:
       return goog.getCssName(this.getCssClass(), 'thumbnail0');

@@ -22,6 +22,8 @@ goog.provide('goog.dom.pattern.ChildMatches');
 
 goog.require('goog.dom.pattern.AllChildren');
 goog.require('goog.dom.pattern.MatchType');
+goog.requireType('goog.dom.TagWalkType');
+goog.requireType('goog.dom.pattern.AbstractPattern');
 
 
 
@@ -37,6 +39,7 @@ goog.require('goog.dom.pattern.MatchType');
  * @final
  */
 goog.dom.pattern.ChildMatches = function(childPattern, opt_minimumMatches) {
+  'use strict';
   /**
    * The child pattern to collect matches from.
    *
@@ -81,6 +84,7 @@ goog.inherits(goog.dom.pattern.ChildMatches, goog.dom.pattern.AllChildren);
  * @override
  */
 goog.dom.pattern.ChildMatches.prototype.matchToken = function(token, type) {
+  'use strict';
   // Defer resets so we maintain our matches array until the last possible time.
   if (this.needsReset_) {
     this.reset();
@@ -137,6 +141,7 @@ goog.dom.pattern.ChildMatches.prototype.matchToken = function(token, type) {
  * @override
  */
 goog.dom.pattern.ChildMatches.prototype.reset = function() {
+  'use strict';
   this.needsReset_ = false;
   this.matches.length = 0;
   this.childPattern_.reset();

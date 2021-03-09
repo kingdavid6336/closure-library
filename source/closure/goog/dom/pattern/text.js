@@ -14,6 +14,7 @@ goog.require('goog.dom.NodeType');
 goog.require('goog.dom.pattern');
 goog.require('goog.dom.pattern.AbstractPattern');
 goog.require('goog.dom.pattern.MatchType');
+goog.requireType('goog.dom.TagWalkType');
 
 
 
@@ -26,6 +27,7 @@ goog.require('goog.dom.pattern.MatchType');
  * @final
  */
 goog.dom.pattern.Text = function(match) {
+  'use strict';
   /**
    * The text or regular expression to match.
    *
@@ -47,6 +49,7 @@ goog.inherits(goog.dom.pattern.Text, goog.dom.pattern.AbstractPattern);
  * @override
  */
 goog.dom.pattern.Text.prototype.matchToken = function(token, type) {
+  'use strict';
   if (token.nodeType == goog.dom.NodeType.TEXT &&
       goog.dom.pattern.matchStringOrRegex(this.match_, token.nodeValue)) {
     this.matchedNode = token;

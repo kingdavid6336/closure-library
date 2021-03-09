@@ -13,6 +13,7 @@ goog.provide('goog.dom.pattern.Repeat');
 goog.require('goog.dom.NodeType');
 goog.require('goog.dom.pattern.AbstractPattern');
 goog.require('goog.dom.pattern.MatchType');
+goog.requireType('goog.dom.TagWalkType');
 
 
 
@@ -29,6 +30,7 @@ goog.require('goog.dom.pattern.MatchType');
  * @final
  */
 goog.dom.pattern.Repeat = function(pattern, opt_minimum, opt_maximum) {
+  'use strict';
   /**
    * Pattern to repetitively match.
    *
@@ -90,6 +92,7 @@ goog.inherits(goog.dom.pattern.Repeat, goog.dom.pattern.AbstractPattern);
  * @override
  */
 goog.dom.pattern.Repeat.prototype.matchToken = function(token, type) {
+  'use strict';
   // Reset if we're starting a new match
   if (this.needsReset_) {
     this.reset();
@@ -158,6 +161,7 @@ goog.dom.pattern.Repeat.prototype.matchToken = function(token, type) {
  * @override
  */
 goog.dom.pattern.Repeat.prototype.reset = function() {
+  'use strict';
   this.pattern_.reset();
   this.count = 0;
   this.needsReset_ = false;

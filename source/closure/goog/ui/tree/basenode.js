@@ -1,16 +1,8 @@
-// Copyright 2007 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview Definition of the goog.ui.tree.BaseNode class.
@@ -19,6 +11,7 @@
  * This is a based on the webfx tree control. It since been updated to add
  * typeahead support, as well as accessibility support using ARIA framework.
  * See file comment in treecontrol.js.
+ * @suppress {missingRequire} TODO(user): this shouldn't be needed
  */
 
 goog.provide('goog.ui.tree.BaseNode');
@@ -37,7 +30,9 @@ goog.require('goog.html.SafeStyle');
 goog.require('goog.string');
 goog.require('goog.string.StringBuffer');
 goog.require('goog.style');
-goog.require('goog.ui.Component');  // circular
+goog.require('goog.ui.Component');
+goog.requireType('goog.dom.DomHelper');
+goog.requireType('goog.events.BrowserEvent');  // circular
 
 
 
@@ -54,6 +49,7 @@ goog.require('goog.ui.Component');  // circular
  * @extends {goog.ui.Component}
  */
 goog.ui.tree.BaseNode = function(content, opt_config, opt_domHelper) {
+  'use strict';
   goog.ui.Component.call(this, opt_domHelper);
 
   /**
@@ -155,6 +151,7 @@ goog.ui.tree.BaseNode.allNodes = {};
 
 /** @override */
 goog.ui.tree.BaseNode.prototype.disposeInternal = function() {
+  'use strict';
   goog.ui.tree.BaseNode.superClass_.disposeInternal.call(this);
   if (this.tree) {
     this.tree.removeNode(this);
@@ -169,6 +166,7 @@ goog.ui.tree.BaseNode.prototype.disposeInternal = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.initAccessibility = function() {
+  'use strict';
   var el = this.getElement();
   if (el) {
     // Set an id for the label
@@ -218,6 +216,7 @@ goog.ui.tree.BaseNode.prototype.initAccessibility = function() {
 
 /** @override */
 goog.ui.tree.BaseNode.prototype.createDom = function() {
+  'use strict';
   var element = this.getDomHelper().safeHtmlToNode(this.toSafeHtml());
   this.setElementInternal(/** @type {!Element} */ (element));
 };
@@ -225,6 +224,7 @@ goog.ui.tree.BaseNode.prototype.createDom = function() {
 
 /** @override */
 goog.ui.tree.BaseNode.prototype.enterDocument = function() {
+  'use strict';
   goog.ui.tree.BaseNode.superClass_.enterDocument.call(this);
   goog.ui.tree.BaseNode.allNodes[this.getId()] = this;
   this.initAccessibility();
@@ -233,6 +233,7 @@ goog.ui.tree.BaseNode.prototype.enterDocument = function() {
 
 /** @override */
 goog.ui.tree.BaseNode.prototype.exitDocument = function() {
+  'use strict';
   goog.ui.tree.BaseNode.superClass_.exitDocument.call(this);
   delete goog.ui.tree.BaseNode.allNodes[this.getId()];
 };
@@ -247,6 +248,7 @@ goog.ui.tree.BaseNode.prototype.exitDocument = function() {
  */
 goog.ui.tree.BaseNode.prototype.addChildAt = function(
     child, index, opt_render) {
+  'use strict';
   goog.asserts.assert(!child.getParent());
   goog.asserts.assertInstanceof(child, goog.ui.tree.BaseNode);
   var prevNode = this.getChildAt(index - 1);
@@ -315,6 +317,7 @@ goog.ui.tree.BaseNode.prototype.addChildAt = function(
  * @return {!goog.ui.tree.BaseNode} The added child.
  */
 goog.ui.tree.BaseNode.prototype.add = function(child, opt_before) {
+  'use strict';
   goog.asserts.assert(
       !opt_before || opt_before.getParent() == this,
       'Can only add nodes before siblings');
@@ -337,6 +340,7 @@ goog.ui.tree.BaseNode.prototype.add = function(child, opt_before) {
  */
 goog.ui.tree.BaseNode.prototype.removeChild = function(
     childNode, opt_unrender) {
+  'use strict';
   // In reality, this only accepts BaseNodes.
   var child = /** @type {goog.ui.tree.BaseNode} */ (childNode);
 
@@ -421,6 +425,7 @@ goog.ui.tree.BaseNode.prototype.remove =
  * @private
  */
 goog.ui.tree.BaseNode.prototype.onTimeoutSelect_ = function() {
+  'use strict';
   this.select();
 };
 
@@ -437,6 +442,7 @@ goog.ui.tree.BaseNode.prototype.getTree = goog.abstractMethod;
  * @return {number} The non-negative depth of this node (the root is zero).
  */
 goog.ui.tree.BaseNode.prototype.getDepth = function() {
+  'use strict';
   var depth = this.depth_;
   if (depth < 0) {
     depth = this.computeDepth_();
@@ -453,6 +459,7 @@ goog.ui.tree.BaseNode.prototype.getDepth = function() {
  * @private
  */
 goog.ui.tree.BaseNode.prototype.computeDepth_ = function() {
+  'use strict';
   var parent = this.getParent();
   if (parent) {
     return parent.getDepth() + 1;
@@ -468,6 +475,7 @@ goog.ui.tree.BaseNode.prototype.computeDepth_ = function() {
  * @private
  */
 goog.ui.tree.BaseNode.prototype.setDepth_ = function(depth) {
+  'use strict';
   if (depth != this.depth_) {
     this.depth_ = depth;
     var row = this.getRowElement();
@@ -479,7 +487,10 @@ goog.ui.tree.BaseNode.prototype.setDepth_ = function(depth) {
         row.style.paddingLeft = indent;
       }
     }
-    this.forEachChild(function(child) { child.setDepth_(depth + 1); });
+    this.forEachChild(function(child) {
+      'use strict';
+      child.setDepth_(depth + 1);
+    });
   }
 };
 
@@ -491,6 +502,7 @@ goog.ui.tree.BaseNode.prototype.setDepth_ = function(depth) {
  *    otherwise.
  */
 goog.ui.tree.BaseNode.prototype.contains = function(node) {
+  'use strict';
   var current = node;
   while (current) {
     if (current == this) {
@@ -522,8 +534,12 @@ goog.ui.tree.BaseNode.prototype.getChildAt;
  * @return {!Array<!goog.ui.tree.BaseNode>} The children.
  */
 goog.ui.tree.BaseNode.prototype.getChildren = function() {
+  'use strict';
   var children = [];
-  this.forEachChild(function(child) { children.push(child); });
+  this.forEachChild(function(child) {
+    'use strict';
+    children.push(child);
+  });
   return children;
 };
 
@@ -532,6 +548,7 @@ goog.ui.tree.BaseNode.prototype.getChildren = function() {
  * @return {goog.ui.tree.BaseNode} The first child of this node.
  */
 goog.ui.tree.BaseNode.prototype.getFirstChild = function() {
+  'use strict';
   return this.getChildAt(0);
 };
 
@@ -540,6 +557,7 @@ goog.ui.tree.BaseNode.prototype.getFirstChild = function() {
  * @return {goog.ui.tree.BaseNode} The last child of this node.
  */
 goog.ui.tree.BaseNode.prototype.getLastChild = function() {
+  'use strict';
   return this.getChildAt(this.getChildCount() - 1);
 };
 
@@ -548,6 +566,7 @@ goog.ui.tree.BaseNode.prototype.getLastChild = function() {
  * @return {goog.ui.tree.BaseNode} The previous sibling of this node.
  */
 goog.ui.tree.BaseNode.prototype.getPreviousSibling = function() {
+  'use strict';
   return this.previousSibling_;
 };
 
@@ -556,6 +575,7 @@ goog.ui.tree.BaseNode.prototype.getPreviousSibling = function() {
  * @return {goog.ui.tree.BaseNode} The next sibling of this node.
  */
 goog.ui.tree.BaseNode.prototype.getNextSibling = function() {
+  'use strict';
   return this.nextSibling_;
 };
 
@@ -564,6 +584,7 @@ goog.ui.tree.BaseNode.prototype.getNextSibling = function() {
  * @return {boolean} Whether the node is the last sibling.
  */
 goog.ui.tree.BaseNode.prototype.isLastSibling = function() {
+  'use strict';
   return !this.nextSibling_;
 };
 
@@ -572,6 +593,7 @@ goog.ui.tree.BaseNode.prototype.isLastSibling = function() {
  * @return {boolean} Whether the node is selected.
  */
 goog.ui.tree.BaseNode.prototype.isSelected = function() {
+  'use strict';
   return this.selected_;
 };
 
@@ -580,6 +602,7 @@ goog.ui.tree.BaseNode.prototype.isSelected = function() {
  * Selects the node.
  */
 goog.ui.tree.BaseNode.prototype.select = function() {
+  'use strict';
   var tree = this.getTree();
   if (tree) {
     tree.setSelectedItem(this);
@@ -600,6 +623,7 @@ goog.ui.tree.BaseNode.prototype.deselect = goog.nullFunction;
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.setSelectedInternal = function(selected) {
+  'use strict';
   if (this.selected_ == selected) {
     return;
   }
@@ -624,6 +648,7 @@ goog.ui.tree.BaseNode.prototype.setSelectedInternal = function(selected) {
  * @return {boolean} Whether the node is expanded.
  */
 goog.ui.tree.BaseNode.prototype.getExpanded = function() {
+  'use strict';
   return this.expanded_;
 };
 
@@ -633,6 +658,7 @@ goog.ui.tree.BaseNode.prototype.getExpanded = function() {
  * @param {boolean} expanded Whether to expand or close the node.
  */
 goog.ui.tree.BaseNode.prototype.setExpandedInternal = function(expanded) {
+  'use strict';
   this.expanded_ = expanded;
 };
 
@@ -642,6 +668,7 @@ goog.ui.tree.BaseNode.prototype.setExpandedInternal = function(expanded) {
  * @param {boolean} expanded Whether to expand or close the node.
  */
 goog.ui.tree.BaseNode.prototype.setExpanded = function(expanded) {
+  'use strict';
   var isStateChange = expanded != this.expanded_;
   if (isStateChange) {
     // Only fire events if the expanded state has actually changed.
@@ -670,10 +697,14 @@ goog.ui.tree.BaseNode.prototype.setExpanded = function(expanded) {
         if (expanded && this.isInDocument() && !ce.hasChildNodes()) {
           var children = [];
           this.forEachChild(function(child) {
+            'use strict';
             children.push(child.toSafeHtml());
           });
           goog.dom.safe.setInnerHtml(ce, goog.html.SafeHtml.concat(children));
-          this.forEachChild(function(child) { child.enterDocument(); });
+          this.forEachChild(function(child) {
+            'use strict';
+            child.enterDocument();
+          });
         }
       }
       this.updateExpandIcon();
@@ -700,6 +731,7 @@ goog.ui.tree.BaseNode.prototype.setExpanded = function(expanded) {
  * Toggles the expanded state of the node.
  */
 goog.ui.tree.BaseNode.prototype.toggle = function() {
+  'use strict';
   this.setExpanded(!this.getExpanded());
 };
 
@@ -708,6 +740,7 @@ goog.ui.tree.BaseNode.prototype.toggle = function() {
  * Expands the node.
  */
 goog.ui.tree.BaseNode.prototype.expand = function() {
+  'use strict';
   this.setExpanded(true);
 };
 
@@ -716,6 +749,7 @@ goog.ui.tree.BaseNode.prototype.expand = function() {
  * Collapses the node.
  */
 goog.ui.tree.BaseNode.prototype.collapse = function() {
+  'use strict';
   this.setExpanded(false);
 };
 
@@ -724,7 +758,11 @@ goog.ui.tree.BaseNode.prototype.collapse = function() {
  * Collapses the children of the node.
  */
 goog.ui.tree.BaseNode.prototype.collapseChildren = function() {
-  this.forEachChild(function(child) { child.collapseAll(); });
+  'use strict';
+  this.forEachChild(function(child) {
+    'use strict';
+    child.collapseAll();
+  });
 };
 
 
@@ -732,6 +770,7 @@ goog.ui.tree.BaseNode.prototype.collapseChildren = function() {
  * Collapses the children and the node.
  */
 goog.ui.tree.BaseNode.prototype.collapseAll = function() {
+  'use strict';
   this.collapseChildren();
   this.collapse();
 };
@@ -741,7 +780,11 @@ goog.ui.tree.BaseNode.prototype.collapseAll = function() {
  * Expands the children of the node.
  */
 goog.ui.tree.BaseNode.prototype.expandChildren = function() {
-  this.forEachChild(function(child) { child.expandAll(); });
+  'use strict';
+  this.forEachChild(function(child) {
+    'use strict';
+    child.expandAll();
+  });
 };
 
 
@@ -749,6 +792,7 @@ goog.ui.tree.BaseNode.prototype.expandChildren = function() {
  * Expands the children and the node.
  */
 goog.ui.tree.BaseNode.prototype.expandAll = function() {
+  'use strict';
   this.expandChildren();
   this.expand();
 };
@@ -758,6 +802,7 @@ goog.ui.tree.BaseNode.prototype.expandAll = function() {
  * Expands the parent chain of this node so that it is visible.
  */
 goog.ui.tree.BaseNode.prototype.reveal = function() {
+  'use strict';
   var parent = this.getParent();
   if (parent) {
     parent.setExpanded(true);
@@ -771,6 +816,7 @@ goog.ui.tree.BaseNode.prototype.reveal = function() {
  * @param {boolean} isCollapsible Whether to allow node collapse.
  */
 goog.ui.tree.BaseNode.prototype.setIsUserCollapsible = function(isCollapsible) {
+  'use strict';
   this.isUserCollapsible_ = isCollapsible;
   if (!this.isUserCollapsible_) {
     this.expand();
@@ -785,6 +831,7 @@ goog.ui.tree.BaseNode.prototype.setIsUserCollapsible = function(isCollapsible) {
  * @return {boolean} Whether the node is collapsible by user actions.
  */
 goog.ui.tree.BaseNode.prototype.isUserCollapsible = function() {
+  'use strict';
   return this.isUserCollapsible_;
 };
 
@@ -795,6 +842,7 @@ goog.ui.tree.BaseNode.prototype.isUserCollapsible = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.toSafeHtml = function() {
+  'use strict';
   var tree = this.getTree();
   var hideLines = !tree.getShowLines() ||
       tree == this.getParent() && !tree.getShowRootLines();
@@ -809,7 +857,10 @@ goog.ui.tree.BaseNode.prototype.toSafeHtml = function() {
   var content = [];
   if (nonEmptyAndExpanded) {
     // children
-    this.forEachChild(function(child) { content.push(child.toSafeHtml()); });
+    this.forEachChild(function(child) {
+      'use strict';
+      content.push(child.toSafeHtml());
+    });
   }
 
   var children = goog.html.SafeHtml.create('div', attributes, content);
@@ -825,6 +876,7 @@ goog.ui.tree.BaseNode.prototype.toSafeHtml = function() {
  * @private
  */
 goog.ui.tree.BaseNode.prototype.getPixelIndent_ = function() {
+  'use strict';
   return Math.max(0, (this.getDepth() - 1) * this.config_.indentWidth);
 };
 
@@ -834,6 +886,7 @@ goog.ui.tree.BaseNode.prototype.getPixelIndent_ = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getRowSafeHtml = function() {
+  'use strict';
   var style = {};
   style['padding-' + (this.isRightToLeft() ? 'right' : 'left')] =
       this.getPixelIndent_() + 'px';
@@ -851,6 +904,7 @@ goog.ui.tree.BaseNode.prototype.getRowSafeHtml = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getRowClassName = function() {
+  'use strict';
   var selectedClass;
   if (this.isSelected()) {
     selectedClass = ' ' + this.config_.cssSelectedRow;
@@ -866,6 +920,7 @@ goog.ui.tree.BaseNode.prototype.getRowClassName = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getLabelSafeHtml = function() {
+  'use strict';
   var html = goog.html.SafeHtml.create(
       'span',
       {'class': this.config_.cssItemLabel, 'title': this.getToolTip() || null},
@@ -883,6 +938,7 @@ goog.ui.tree.BaseNode.prototype.getLabelSafeHtml = function() {
  * @final
  */
 goog.ui.tree.BaseNode.prototype.getAfterLabelHtml = function() {
+  'use strict';
   return goog.html.SafeHtml.unwrap(this.getAfterLabelSafeHtml());
 };
 
@@ -893,6 +949,7 @@ goog.ui.tree.BaseNode.prototype.getAfterLabelHtml = function() {
  * @return {!goog.html.SafeHtml} The html.
  */
 goog.ui.tree.BaseNode.prototype.getAfterLabelSafeHtml = function() {
+  'use strict';
   return this.afterLabelHtml_;
 };
 
@@ -903,6 +960,7 @@ goog.ui.tree.BaseNode.prototype.getAfterLabelSafeHtml = function() {
  * @param {!goog.html.SafeHtml} html The html.
  */
 goog.ui.tree.BaseNode.prototype.setAfterLabelSafeHtml = function(html) {
+  'use strict';
   this.afterLabelHtml_ = html;
   var el = this.getAfterLabelElement();
   if (el) {
@@ -916,6 +974,7 @@ goog.ui.tree.BaseNode.prototype.setAfterLabelSafeHtml = function(html) {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getIconSafeHtml = function() {
+  'use strict';
   return goog.html.SafeHtml.create('span', {
     'style': {'display': 'inline-block'},
     'class': this.getCalculatedIconClass()
@@ -935,6 +994,7 @@ goog.ui.tree.BaseNode.prototype.getCalculatedIconClass = goog.abstractMethod;
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getExpandIconSafeHtml = function() {
+  'use strict';
   return goog.html.SafeHtml.create('span', {
     'type': 'expand',
     'style': {'display': 'inline-block'},
@@ -948,6 +1008,7 @@ goog.ui.tree.BaseNode.prototype.getExpandIconSafeHtml = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getExpandIconClass = function() {
+  'use strict';
   var tree = this.getTree();
   var hideLines = !tree.getShowLines() ||
       tree == this.getParent() && !tree.getShowRootLines();
@@ -1027,6 +1088,7 @@ goog.ui.tree.BaseNode.prototype.getExpandIconClass = function() {
  * @return {!goog.html.SafeStyle} The line style.
  */
 goog.ui.tree.BaseNode.prototype.getLineStyle = function() {
+  'use strict';
   var nonEmptyAndExpanded = this.getExpanded() && this.hasChildren();
   return goog.html.SafeStyle.create({
     'background-position': this.getBackgroundPosition(),
@@ -1039,8 +1101,10 @@ goog.ui.tree.BaseNode.prototype.getLineStyle = function() {
  * @return {string} The background position style value.
  */
 goog.ui.tree.BaseNode.prototype.getBackgroundPosition = function() {
-  return (this.isLastSibling() ? '-100' : (this.getDepth() - 1) *
-                  this.config_.indentWidth) +
+  'use strict';
+  return (this.isLastSibling() ?
+              '-100' :
+              (this.getDepth() - 1) * this.config_.indentWidth) +
       'px 0';
 };
 
@@ -1050,6 +1114,7 @@ goog.ui.tree.BaseNode.prototype.getBackgroundPosition = function() {
  * @override
  */
 goog.ui.tree.BaseNode.prototype.getElement = function() {
+  'use strict';
   var el = goog.ui.tree.BaseNode.superClass_.getElement.call(this);
   if (!el) {
     el = this.getDomHelper().getElement(this.getId());
@@ -1064,6 +1129,7 @@ goog.ui.tree.BaseNode.prototype.getElement = function() {
  *     the children.
  */
 goog.ui.tree.BaseNode.prototype.getRowElement = function() {
+  'use strict';
   var el = this.getElement();
   return el ? /** @type {Element} */ (el.firstChild) : null;
 };
@@ -1074,6 +1140,7 @@ goog.ui.tree.BaseNode.prototype.getRowElement = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getExpandIconElement = function() {
+  'use strict';
   var el = this.getRowElement();
   return el ? /** @type {Element} */ (el.firstChild) : null;
 };
@@ -1084,6 +1151,7 @@ goog.ui.tree.BaseNode.prototype.getExpandIconElement = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getIconElement = function() {
+  'use strict';
   var el = this.getRowElement();
   return el ? /** @type {Element} */ (el.childNodes[1]) : null;
 };
@@ -1093,6 +1161,7 @@ goog.ui.tree.BaseNode.prototype.getIconElement = function() {
  * @return {Element} The label element.
  */
 goog.ui.tree.BaseNode.prototype.getLabelElement = function() {
+  'use strict';
   var el = this.getRowElement();
   // TODO: find/fix race condition that requires us to add
   // the lastChild check
@@ -1106,6 +1175,7 @@ goog.ui.tree.BaseNode.prototype.getLabelElement = function() {
  * @return {Element} The element after the label.
  */
 goog.ui.tree.BaseNode.prototype.getAfterLabelElement = function() {
+  'use strict';
   var el = this.getRowElement();
   return el ? /** @type {Element} */ (el.lastChild) : null;
 };
@@ -1116,6 +1186,7 @@ goog.ui.tree.BaseNode.prototype.getAfterLabelElement = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.getChildrenElement = function() {
+  'use strict';
   var el = this.getElement();
   return el ? /** @type {Element} */ (el.lastChild) : null;
 };
@@ -1126,6 +1197,7 @@ goog.ui.tree.BaseNode.prototype.getChildrenElement = function() {
  * @param {string} s The icon class.
  */
 goog.ui.tree.BaseNode.prototype.setIconClass = function(s) {
+  'use strict';
   this.iconClass_ = s;
   if (this.isInDocument()) {
     this.updateIcon_();
@@ -1138,6 +1210,7 @@ goog.ui.tree.BaseNode.prototype.setIconClass = function(s) {
  * @return {string} s The icon source.
  */
 goog.ui.tree.BaseNode.prototype.getIconClass = function() {
+  'use strict';
   return this.iconClass_;
 };
 
@@ -1147,6 +1220,7 @@ goog.ui.tree.BaseNode.prototype.getIconClass = function() {
  * @param {string} s The expanded icon class.
  */
 goog.ui.tree.BaseNode.prototype.setExpandedIconClass = function(s) {
+  'use strict';
   this.expandedIconClass_ = s;
   if (this.isInDocument()) {
     this.updateIcon_();
@@ -1159,6 +1233,7 @@ goog.ui.tree.BaseNode.prototype.setExpandedIconClass = function(s) {
  * @return {string} The class.
  */
 goog.ui.tree.BaseNode.prototype.getExpandedIconClass = function() {
+  'use strict';
   return this.expandedIconClass_;
 };
 
@@ -1168,6 +1243,7 @@ goog.ui.tree.BaseNode.prototype.getExpandedIconClass = function() {
  * @param {string} s The plain text of the label.
  */
 goog.ui.tree.BaseNode.prototype.setText = function(s) {
+  'use strict';
   this.setSafeHtml(goog.html.SafeHtml.htmlEscape(s));
 };
 
@@ -1178,6 +1254,7 @@ goog.ui.tree.BaseNode.prototype.setText = function(s) {
  * @return {string} The plain text of the label.
  */
 goog.ui.tree.BaseNode.prototype.getText = function() {
+  'use strict';
   return goog.string.unescapeEntities(goog.html.SafeHtml.unwrap(this.html_));
 };
 
@@ -1187,6 +1264,7 @@ goog.ui.tree.BaseNode.prototype.getText = function() {
  * @param {!goog.html.SafeHtml} html The HTML object for the label.
  */
 goog.ui.tree.BaseNode.prototype.setSafeHtml = function(html) {
+  'use strict';
   this.html_ = html;
   var el = this.getLabelElement();
   if (el) {
@@ -1206,6 +1284,7 @@ goog.ui.tree.BaseNode.prototype.setSafeHtml = function(html) {
  * @final
  */
 goog.ui.tree.BaseNode.prototype.getHtml = function() {
+  'use strict';
   return goog.html.SafeHtml.unwrap(this.getSafeHtml());
 };
 
@@ -1215,6 +1294,7 @@ goog.ui.tree.BaseNode.prototype.getHtml = function() {
  * @return {!goog.html.SafeHtml} The html string of the label.
  */
 goog.ui.tree.BaseNode.prototype.getSafeHtml = function() {
+  'use strict';
   return this.html_;
 };
 
@@ -1224,6 +1304,7 @@ goog.ui.tree.BaseNode.prototype.getSafeHtml = function() {
  * @param {string} s The tooltip text to set.
  */
 goog.ui.tree.BaseNode.prototype.setToolTip = function(s) {
+  'use strict';
   this.toolTip_ = s;
   var el = this.getLabelElement();
   if (el) {
@@ -1237,6 +1318,7 @@ goog.ui.tree.BaseNode.prototype.setToolTip = function(s) {
  * @return {?string} The tooltip text.
  */
 goog.ui.tree.BaseNode.prototype.getToolTip = function() {
+  'use strict';
   return this.toolTip_;
 };
 
@@ -1245,6 +1327,7 @@ goog.ui.tree.BaseNode.prototype.getToolTip = function() {
  * Updates the row styles.
  */
 goog.ui.tree.BaseNode.prototype.updateRow = function() {
+  'use strict';
   var rowEl = this.getRowElement();
   if (rowEl) {
     rowEl.className = this.getRowClassName();
@@ -1256,6 +1339,7 @@ goog.ui.tree.BaseNode.prototype.updateRow = function() {
  * Updates the expand icon of the node.
  */
 goog.ui.tree.BaseNode.prototype.updateExpandIcon = function() {
+  'use strict';
   var img = this.getExpandIconElement();
   if (img) {
     img.className = this.getExpandIconClass();
@@ -1272,6 +1356,7 @@ goog.ui.tree.BaseNode.prototype.updateExpandIcon = function() {
  * @private
  */
 goog.ui.tree.BaseNode.prototype.updateIcon_ = function() {
+  'use strict';
   this.getIconElement().className = this.getCalculatedIconClass();
 };
 
@@ -1282,6 +1367,7 @@ goog.ui.tree.BaseNode.prototype.updateIcon_ = function() {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.onMouseDown = function(e) {
+  'use strict';
   var el = e.target;
   // expand icon
   var type = el.getAttribute('type');
@@ -1313,6 +1399,7 @@ goog.ui.tree.BaseNode.prototype.onClick_ = goog.events.Event.preventDefault;
  * @suppress {underscore|visibility}
  */
 goog.ui.tree.BaseNode.prototype.onDoubleClick_ = function(e) {
+  'use strict';
   var el = e.target;
   // expand icon
   var type = el.getAttribute('type');
@@ -1333,6 +1420,7 @@ goog.ui.tree.BaseNode.prototype.onDoubleClick_ = function(e) {
  * @protected
  */
 goog.ui.tree.BaseNode.prototype.onKeyDown = function(e) {
+  'use strict';
   var handled = true;
   switch (e.keyCode) {
     case goog.events.KeyCodes.RIGHT:
@@ -1400,6 +1488,7 @@ goog.ui.tree.BaseNode.prototype.onKeyDown = function(e) {
  * @return {goog.ui.tree.BaseNode} The last shown descendant.
  */
 goog.ui.tree.BaseNode.prototype.getLastShownDescendant = function() {
+  'use strict';
   if (!this.getExpanded() || !this.hasChildren()) {
     return this;
   }
@@ -1413,6 +1502,7 @@ goog.ui.tree.BaseNode.prototype.getLastShownDescendant = function() {
  *     a next node to show.
  */
 goog.ui.tree.BaseNode.prototype.getNextShownNode = function() {
+  'use strict';
   if (this.hasChildren() && this.getExpanded()) {
     return this.getFirstChild();
   } else {
@@ -1434,6 +1524,7 @@ goog.ui.tree.BaseNode.prototype.getNextShownNode = function() {
  * @return {goog.ui.tree.BaseNode} The previous node to show.
  */
 goog.ui.tree.BaseNode.prototype.getPreviousShownNode = function() {
+  'use strict';
   var ps = this.getPreviousSibling();
   if (ps != null) {
     return ps.getLastShownDescendant();
@@ -1472,6 +1563,7 @@ goog.ui.tree.BaseNode.prototype.setClientData =
  * @return {Object} The configuration for the tree.
  */
 goog.ui.tree.BaseNode.prototype.getConfig = function() {
+  'use strict';
   return this.config_;
 };
 
@@ -1481,11 +1573,15 @@ goog.ui.tree.BaseNode.prototype.getConfig = function() {
  * @param {goog.ui.tree.TreeControl} tree The tree control.
  */
 goog.ui.tree.BaseNode.prototype.setTreeInternal = function(tree) {
+  'use strict';
   if (this.tree != tree) {
     this.tree = tree;
     // Add new node to the type ahead node map.
     tree.setNode(this);
-    this.forEachChild(function(child) { child.setTreeInternal(tree); });
+    this.forEachChild(function(child) {
+      'use strict';
+      child.setTreeInternal(tree);
+    });
   }
 };
 

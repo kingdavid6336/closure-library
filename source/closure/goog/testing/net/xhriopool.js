@@ -1,16 +1,8 @@
-// Copyright 2011 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview An XhrIo pool that uses a single mock XHR object for testing.
@@ -30,6 +22,7 @@ goog.provide('goog.testing.net.XhrIoPool');
 
 goog.require('goog.net.XhrIoPool');
 goog.require('goog.testing.net.XhrIo');
+goog.requireType('goog.net.XhrIo');
 
 
 
@@ -42,6 +35,7 @@ goog.require('goog.testing.net.XhrIo');
  * @final
  */
 goog.testing.net.XhrIoPool = function(opt_xhr) {
+  'use strict';
   /**
    * The mock XhrIo object.
    * @type {!goog.testing.net.XhrIo}
@@ -60,8 +54,18 @@ goog.inherits(goog.testing.net.XhrIoPool, goog.net.XhrIoPool);
  * @suppress {invalidCasts}
  */
 goog.testing.net.XhrIoPool.prototype.createObject = function() {
+  'use strict';
   return (/** @type {!goog.net.XhrIo} */ (this.xhr_));
 };
+
+
+/**
+ * Override adjustForMinMax to not call handleRequests because that causes
+ * problems.  See b/31041087.
+ *
+ * @override
+ */
+goog.testing.net.XhrIoPool.prototype.adjustForMinMax = function() {};
 
 
 /**
@@ -70,5 +74,6 @@ goog.testing.net.XhrIoPool.prototype.createObject = function() {
  * @return {!goog.testing.net.XhrIo} The mock XhrIo.
  */
 goog.testing.net.XhrIoPool.prototype.getXhr = function() {
+  'use strict';
   return this.xhr_;
 };

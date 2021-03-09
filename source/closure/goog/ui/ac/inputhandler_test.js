@@ -1,16 +1,13 @@
-// Copyright 2007 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * @fileoverview
+ * @suppress {missingRequire} TODO(user): this shouldn't be needed
+ */
 
 goog.module('goog.ui.ac.InputHandlerTest');
 goog.setTestOnly();
@@ -39,6 +36,7 @@ class MockElement extends GoogEventTarget {
     super();
     this.setAttributeNS = () => {};
     this.setAttribute = function(key, value) {
+      /** @suppress {checkTypes} suppression added to enable type checking */
       this[key] = value;
     };
     this.focus = () => {};
@@ -81,13 +79,18 @@ class MockInputHandler extends InputHandler {
   constructor() {
     super();
 
+    /** @suppress {checkTypes} suppression added to enable type checking */
     this.ac_ = new MockAutoCompleter();
     this.cursorPosition_ = 0;
 
     this.attachInput(mockElement);
   }
 
-  /** Checks for updates to the text area, should not happen during IME. */
+  /**
+   * Checks for updates to the text area, should not happen during IME.
+   * @suppress {checkTypes,missingProperties} suppression added to enable type
+   * checking
+   */
   update() {
     this.updates++;
   }
@@ -111,6 +114,7 @@ class MockInputHandler extends InputHandler {
     if (properties) {
       googObject.extend(e, properties);
     }
+    /** @suppress {checkTypes} suppression added to enable type checking */
     e = new BrowserEvent(e);
     mockElement.dispatchEvent(e);
   }
@@ -148,7 +152,8 @@ function simulateWinFirefox() {
   userAgent.EDGE_OR_IE = false;
   userAgent.GECKO = true;
   userAgent.WEBKIT = false;
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 /** Used to simulate behavior of Windows/InternetExplorer7 */
@@ -162,7 +167,8 @@ function simulateWinIe7() {
   userAgent.DOCUMENT_MODE = 7;
   userAgent.GECKO = false;
   userAgent.WEBKIT = false;
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 /** Used to simulate behavior of Windows/Chrome */
@@ -176,7 +182,8 @@ function simulateWinChrome() {
   userAgent.GECKO = false;
   userAgent.WEBKIT = true;
   userAgent.VERSION = '525';
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 /** Used to simulate behavior of Mac/Firefox */
@@ -189,7 +196,8 @@ function simulateMacFirefox() {
   userAgent.EDGE_OR_IE = false;
   userAgent.GECKO = true;
   userAgent.WEBKIT = false;
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 /** Used to simulate behavior of Mac/Safari3 */
@@ -203,7 +211,8 @@ function simulateMacSafari3() {
   userAgent.GECKO = false;
   userAgent.WEBKIT = true;
   userAgent.VERSION = '525';
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 /** Used to simulate behavior of Linux/Firefox */
@@ -216,7 +225,8 @@ function simulateLinuxFirefox() {
   userAgent.EDGE_OR_IE = false;
   userAgent.GECKO = true;
   userAgent.WEBKIT = false;
-  goog.events.KeyHandler.USES_KEYDOWN_ = true;
+  /** @suppress {visibility} suppression added to enable type checking */
+  KeyHandler.USES_KEYDOWN_ = true;
 }
 
 testSuite({
@@ -228,7 +238,8 @@ testSuite({
     oldFf = userAgent.GECKO;
     oldWebkit = userAgent.WEBKIT;
     oldVersion = userAgent.VERSION;
-    oldUsesKeyDown = goog.events.KeyHandler.USES_KEYDOWN_;
+    /** @suppress {visibility} suppression added to enable type checking */
+    oldUsesKeyDown = KeyHandler.USES_KEYDOWN_;
     mockClock = new MockClock(true);
     mockElement = new MockElement;
     mh = new MockInputHandler;
@@ -242,12 +253,17 @@ testSuite({
     userAgent.GECKO = oldFf;
     userAgent.WEBKIT = oldWebkit;
     userAgent.VERSION = oldVersion;
-    goog.events.KeyHandler.USES_KEYDOWN_ = oldUsesKeyDown;
+    /** @suppress {visibility} suppression added to enable type checking */
+    KeyHandler.USES_KEYDOWN_ = oldUsesKeyDown;
     mockClock.dispose();
     mockElement.dispose();
   },
 
-  /** Test the normal, non-IME case */
+  /**
+   * Test the normal, non-IME case
+   * @suppress {visibility} suppression added to
+   *      enable type checking
+   */
   testRegularKey() {
     // Each key fires down, press, and up in that order, and each should
     // trigger an autocomplete update
@@ -264,6 +280,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Windows/Firefox.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeWinFirefox() {
     simulateWinFirefox();
@@ -299,6 +316,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Windows/InternetExplorer7.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeWinIe7() {
     simulateWinIe7();
@@ -335,6 +353,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Windows/Chrome.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeWinChrome() {
     simulateWinChrome();
@@ -371,6 +390,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Mac/Firefox.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeMacFirefox() {
     // TODO(user): Currently our code cannot distinguish preedit characters
@@ -411,6 +431,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Mac/Safari3.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeMacSafari3() {
     simulateMacSafari3();
@@ -447,6 +468,7 @@ testSuite({
    * This test simulates the key inputs generated by pressing
    * '<ime_on>a<enter>i<ime_off>u' using the Japanese IME
    * on Linux/Firefox.
+   * @suppress {visibility} suppression added to enable type checking
    */
   testImeLinuxFirefox() {
     // TODO(user): Currently our code cannot distinguish preedit characters
@@ -482,7 +504,10 @@ testSuite({
     mh.fireEvent('blur', '');
   },
 
-  /** Check attaching to an EventTarget instead of an element. */
+  /**
+     Check attaching to an EventTarget instead of an element.
+     @suppress {visibility} suppression added to enable type checking
+   */
   testAttachEventTarget1() {
     const target = new GoogEventTarget();
 
@@ -496,7 +521,10 @@ testSuite({
     mh.detachInput(target);
   },
 
-  /** Make sure that the active element handling works. */
+  /**
+   * Make sure that the active element handling works.
+   * @suppress {visibility} suppression added to enable type checking
+   */
   testActiveElement() {
     assertNull(mh.activeElement_);
 
@@ -513,7 +541,10 @@ testSuite({
     assertNull(mh.activeElement_);
   },
 
-  /** We can attach an EventTarget that isn't an element. */
+  /**
+   * We can attach an EventTarget that isn't an element.
+   * @suppress {visibility} suppression added to enable type checking
+   */
   testAttachEventTarget2() {
     const target = new GoogEventTarget();
 
@@ -527,7 +558,10 @@ testSuite({
     mh.detachInput(target);
   },
 
-  /** Make sure an already-focused element becomes active immediately. */
+  /**
+     Make sure an already-focused element becomes active immediately.
+     @suppress {visibility} suppression added to enable type checking
+   */
   testActiveElementAlreadyFocused() {
     const element = document.getElementById('textInput');
     element.style.display = '';
@@ -547,7 +581,12 @@ testSuite({
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
 
     const row = {};
@@ -564,13 +603,20 @@ testSuite({
         mockAutoCompleter.setTokenWasCalled);
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testSetTokenText() {
     const ih = new MockInputHandler();
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = 'bob, wal, joey';
     ih.setCursorPosition(8);
 
@@ -579,6 +625,7 @@ testSuite({
     assertEquals('bob, waldo, joey', mockElement.value);
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testSetTokenTextLeftHandSideOfToken() {
     const ih = new MockInputHandler();
     ih.setSeparators(' ');
@@ -586,8 +633,14 @@ testSuite({
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = 'foo bar';
     // Sets cursor position right before 'bar'
     ih.setCursorPosition(4);
@@ -597,6 +650,7 @@ testSuite({
     assertEquals('foo bar ', mockElement.value);
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testSetTokenTextAppendSeparator() {
     const ih = new MockInputHandler();
     ih.setSeparators('\n');
@@ -604,8 +658,14 @@ testSuite({
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = 'foo bar';
     ih.setCursorPosition(0);
 
@@ -615,6 +675,7 @@ testSuite({
     assertEquals('baz\n', mockElement.value);
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testSetTokenTextDontAppendSeparator() {
     const ih = new MockInputHandler();
     ih.setSeparators('\n');
@@ -623,8 +684,14 @@ testSuite({
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = 'foo bar';
     ih.setCursorPosition(0);
 
@@ -634,11 +701,18 @@ testSuite({
     assertEquals('baz', mockElement.value);
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testEmptyTokenWithSeparator() {
     const ih = new InputHandler();
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = ', ,';
     // Sets cursor position before the second comma
     selection.setStart(mockElement, 2);
@@ -652,11 +726,18 @@ testSuite({
         mockAutoCompleter.setToken);
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testNonEmptyTokenWithSeparator() {
     const ih = new InputHandler();
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     ih.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     ih.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = ', joe ,';
     // Sets cursor position before the second comma
     selection.setStart(mockElement, 5);
@@ -720,6 +801,7 @@ testSuite({
     assertTrue('Should be dismissed', mh.ac_.dismissWasCalled);
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testEmptySeparatorUsesDefaults() {
     const inputHandler = new InputHandler('');
     assertFalse(inputHandler.separatorCheck_.test(''));
@@ -727,6 +809,7 @@ testSuite({
     assertTrue(inputHandler.separatorCheck_.test(','));
   },
 
+  /** @suppress {visibility} suppression added to enable type checking */
   testMultipleSeparatorUsesEmptyDefaults() {
     const inputHandler = new InputHandler(',\n', null, true);
     inputHandler.setWhitespaceWrapEntries(false);
@@ -734,8 +817,14 @@ testSuite({
 
     // Set up our input handler with the necessary mocks
     const mockAutoCompleter = new MockAutoCompleter();
+    /** @suppress {checkTypes} suppression added to enable type checking */
     inputHandler.ac_ = mockAutoCompleter;
+    /**
+     * @suppress {visibility,checkTypes} suppression added to enable type
+     * checking
+     */
     inputHandler.activeElement_ = mockElement;
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mockElement.value = 'bob,wal';
     inputHandler.setCursorPosition(8);
 

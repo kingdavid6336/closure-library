@@ -32,7 +32,7 @@ testSuite({
     const extracted = SafeStyleSheet.unwrap(safeStyleSheet);
     assertEquals(styleSheet, extracted);
     assertEquals(styleSheet, safeStyleSheet.getTypedStringValue());
-    assertEquals(`SafeStyleSheet{${styleSheet}}`, String(safeStyleSheet));
+    assertEquals(`${styleSheet}`, String(safeStyleSheet));
 
     // Interface marker is present.
     assertTrue(safeStyleSheet.implementsGoogStringTypedString);
@@ -42,15 +42,11 @@ testSuite({
   testUnwrap() {
     const privateFieldName =
         'privateDoNotAccessOrElseSafeStyleSheetWrappedValue_';
-    const markerFieldName =
-        'SAFE_STYLE_SHEET_TYPE_MARKER_GOOG_HTML_SECURITY_PRIVATE_';
     const propNames =
         googObject.getKeys(SafeStyleSheet.fromConstant(Const.from('')));
     assertContains(privateFieldName, propNames);
-    assertContains(markerFieldName, propNames);
     const evil = {};
     evil[privateFieldName] = 'P.special { color:expression(evil) ; }';
-    evil[markerFieldName] = {};
 
     const exception = assertThrows(() => {
       SafeStyleSheet.unwrap(evil);

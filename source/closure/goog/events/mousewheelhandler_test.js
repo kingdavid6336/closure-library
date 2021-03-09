@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @fileoverview
+ * @suppress {missingRequire} swapping userAgent
+ */
+
 goog.module('goog.events.MouseWheelHandlerTest');
 goog.setTestOnly();
 
@@ -35,7 +40,7 @@ let mouseWheelHandler;
 let mouseWheelHandlerRtl;
 
 function runWebKitContinuousAndDiscreteEventsTest() {
-  goog.userAgent.isVersionOrHigher = functions.TRUE;
+  userAgent.isVersionOrHigher = functions.TRUE;
 
   createHandlerAndListen();
 
@@ -109,6 +114,7 @@ function assertMouseWheelEvent(expectedDetail, expectedDeltaX, expectedDeltaY) {
       mouseWheelEventRtl.deltaY);
 }
 
+/** @suppress {checkTypes} suppression added to enable type checking */
 function createFakeMouseWheelEvent(
     type, opt_wheelDelta, opt_detail, opt_axis, opt_wheelDeltaX,
     opt_wheelDeltaY) {
@@ -161,12 +167,15 @@ testSuite({
 
     events.listen(
         mouseWheelHandler, MouseWheelHandler.EventType.MOUSEWHEEL, (e) => {
-          log.innerHTML += googString.subs(
-              '<br />(deltaX, deltaY): (%s, %s)', e.deltaX, e.deltaY);
+          log.append(
+              document.createElement('br'),
+              googString.subs(
+                  '(deltaX, deltaY): (%s, %s)', e.deltaX, e.deltaY));
         });
   },
 
   testIeStyleMouseWheel() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent =
         {OPERA: false, EDGE_OR_IE: true, GECKO: false, WEBKIT: false};
 
@@ -184,13 +193,16 @@ testSuite({
   },
 
   testNullBody() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent = {OPERA: false, IE: true, GECKO: false, WEBKIT: false};
     const documentObjectWithNoBody = {};
     testingEvents.mixinListenable(documentObjectWithNoBody);
+    /** @suppress {checkTypes} suppression added to enable type checking */
     mouseWheelHandler = new MouseWheelHandler(documentObjectWithNoBody);
   },
 
   testGeckoStyleMouseWheel() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent = {OPERA: false, IE: false, GECKO: true, WEBKIT: false};
 
     createHandlerAndListen();
@@ -220,6 +232,7 @@ testSuite({
   },
 
   testWebkitStyleMouseWheel_ieStyle() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent =
         {OPERA: false, IE: false, GECKO: false, WEBKIT: true, WINDOWS: true};
 
@@ -243,6 +256,7 @@ testSuite({
   },
 
   testWebkitStyleMouseWheel_ieStyleOnLinux() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent = {
       OPERA: false,
       IE: false,
@@ -255,6 +269,7 @@ testSuite({
   },
 
   testWebkitStyleMouseWheel_ieStyleOnMac() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent = {
       OPERA: false,
       IE: false,
@@ -267,10 +282,11 @@ testSuite({
   },
 
   testWebkitStyleMouseWheel_nonIeStyle() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent =
         {OPERA: false, IE: false, GECKO: false, WEBKIT: true, WINDOWS: false};
 
-    goog.userAgent.isVersionOrHigher = functions.FALSE;
+    userAgent.isVersionOrHigher = functions.FALSE;
 
     createHandlerAndListen();
 
@@ -292,6 +308,7 @@ testSuite({
   },
 
   testMaxDeltaX() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent =
         {OPERA: false, IE: false, GECKO: false, WEBKIT: true, WINDOWS: true};
 
@@ -316,6 +333,7 @@ testSuite({
   },
 
   testMaxDeltaY() {
+    /** @suppress {checkTypes} suppression added to enable type checking */
     goog.userAgent =
         {OPERA: false, IE: false, GECKO: false, WEBKIT: true, WINDOWS: true};
 

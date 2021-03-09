@@ -24,8 +24,9 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 const TEST_DIR = 'goog-fs-test-dir';
 
-const fsExists = (goog.global.requestFileSystem !== undefined) ||
-    goog.global.webkitRequestFileSystem !== undefined;
+const fsExists = (globalThis.requestFileSystem !== undefined) ||
+    globalThis.webkitRequestFileSystem !== undefined;
+/** @suppress {checkTypes} suppression added to enable type checking */
 const deferredFs = fsExists ? googFs.getTemporary() : null;
 const stubs = new PropertyReplacer();
 
@@ -95,6 +96,7 @@ function checkEquals(a, b) {
   }
 }
 
+/** @suppress {checkTypes} suppression added to enable type checking */
 function checkFileRemoved(filename) {
   return loadFile(filename).then(
       goog.partial(fail, 'expected file to be removed'), (err) => {
@@ -143,21 +145,31 @@ testSuite({
   },
 
   testUnavailableTemporaryFilesystem() {
-    stubs.set(goog.global, 'requestFileSystem', null);
-    stubs.set(goog.global, 'webkitRequestFileSystem', null);
+    stubs.set(globalThis, 'requestFileSystem', null);
+    stubs.set(globalThis, 'webkitRequestFileSystem', null);
 
-    return googFs.getTemporary(1024).then(fail, (e) => {
-      assertEquals('File API unsupported', e.message);
-    });
+    return googFs.getTemporary(1024).then(
+        fail, /**
+                 @suppress {strictMissingProperties} suppression added to
+                 enable type checking
+               */
+        (e) => {
+          assertEquals('File API unsupported', e.message);
+        });
   },
 
   testUnavailablePersistentFilesystem() {
-    stubs.set(goog.global, 'requestFileSystem', null);
-    stubs.set(goog.global, 'webkitRequestFileSystem', null);
+    stubs.set(globalThis, 'requestFileSystem', null);
+    stubs.set(globalThis, 'webkitRequestFileSystem', null);
 
-    return googFs.getPersistent(2048).then(fail, (e) => {
-      assertEquals('File API unsupported', e.message);
-    });
+    return googFs.getPersistent(2048).then(
+        fail, /**
+                 @suppress {strictMissingProperties} suppression added to
+                 enable type checking
+               */
+        (e) => {
+          assertEquals('File API unsupported', e.message);
+        });
   },
 
   testIsFile() {
@@ -303,6 +315,7 @@ testSuite({
         .then(goog.partial(checkFileContent, 'test content'));
   },
 
+  /** @suppress {uselessCode} suppression added to enable type checking */
   testAbortWrite() {
     // TODO(nicksantos): This test is broken in newer versions of chrome.
     // We don't know why yet.
@@ -318,7 +331,11 @@ testSuite({
                 events.listenOnce(writer, FsFileSaver.EventType.ABORT, resolve);
                 writer.abort();
               }))
-        .then(() => loadFile('test'))
+        .then(/**
+                 @suppress {checkTypes} suppression added to enable type
+                 checking
+               */
+              () => loadFile('test'))
         .then(goog.partial(checkFileContent, ''));
   },
 
@@ -518,6 +535,7 @@ testSuite({
         });
   },
 
+  /** @suppress {uselessCode} suppression added to enable type checking */
   testListBigDirectory() {
     // TODO(nicksantos): This test is broken in newer versions of chrome.
     // We don't know why yet.
@@ -561,6 +579,7 @@ testSuite({
         });
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testSliceBlob() {
     // A mock blob object whose slice returns the parameters it was called with.
     const blob = {
@@ -570,84 +589,18 @@ testSuite({
       },
     };
 
-    // Simulate Firefox 13 that implements the new slice.
-    let tmpStubs = new PropertyReplacer();
-    tmpStubs.set(goog.userAgent, 'GECKO', true);
-    tmpStubs.set(goog.userAgent, 'WEBKIT', false);
-    tmpStubs.set(goog.userAgent, 'IE', false);
-    tmpStubs.set(goog.userAgent, 'VERSION', '13.0');
-    tmpStubs.set(goog.userAgent, 'isVersionOrHigherCache_', {});
-
     // Expect slice to be called with no change to parameters
     assertArrayEquals([2, 10], googFs.sliceBlob(blob, 2));
     assertArrayEquals([-2, 10], googFs.sliceBlob(blob, -2));
     assertArrayEquals([3, 6], googFs.sliceBlob(blob, 3, 6));
     assertArrayEquals([3, -6], googFs.sliceBlob(blob, 3, -6));
-
-    // Simulate IE 10 that implements the new slice.
-    tmpStubs = new PropertyReplacer();
-    tmpStubs.set(goog.userAgent, 'GECKO', false);
-    tmpStubs.set(goog.userAgent, 'WEBKIT', false);
-    tmpStubs.set(goog.userAgent, 'IE', true);
-    tmpStubs.set(goog.userAgent, 'VERSION', '10.0');
-    tmpStubs.set(goog.userAgent, 'isVersionOrHigherCache_', {});
-
-    // Expect slice to be called with no change to parameters
-    assertArrayEquals([2, 10], googFs.sliceBlob(blob, 2));
-    assertArrayEquals([-2, 10], googFs.sliceBlob(blob, -2));
-    assertArrayEquals([3, 6], googFs.sliceBlob(blob, 3, 6));
-    assertArrayEquals([3, -6], googFs.sliceBlob(blob, 3, -6));
-
-    // Simulate Firefox 4 that implements the old slice.
-    tmpStubs.set(goog.userAgent, 'GECKO', true);
-    tmpStubs.set(goog.userAgent, 'WEBKIT', false);
-    tmpStubs.set(goog.userAgent, 'IE', false);
-    tmpStubs.set(goog.userAgent, 'VERSION', '2.0');
-    tmpStubs.set(goog.userAgent, 'isVersionOrHigherCache_', {});
-
-    // Expect slice to be called with transformed parameters.
-    assertArrayEquals([2, 8], googFs.sliceBlob(blob, 2));
-    assertArrayEquals([8, 2], googFs.sliceBlob(blob, -2));
-    assertArrayEquals([3, 3], googFs.sliceBlob(blob, 3, 6));
-    assertArrayEquals([3, 1], googFs.sliceBlob(blob, 3, -6));
-
-    // Simulate Firefox 5 that implements mozSlice (new spec).
-    delete blob.slice;
-    blob.mozSlice = (start, end) => ['moz', start, end];
-    tmpStubs.set(goog.userAgent, 'GECKO', true);
-    tmpStubs.set(goog.userAgent, 'WEBKIT', false);
-    tmpStubs.set(goog.userAgent, 'IE', false);
-    tmpStubs.set(goog.userAgent, 'VERSION', '5.0');
-    tmpStubs.set(goog.userAgent, 'isVersionOrHigherCache_', {});
-
-    // Expect mozSlice to be called with no change to parameters.
-    assertArrayEquals(['moz', 2, 10], googFs.sliceBlob(blob, 2));
-    assertArrayEquals(['moz', -2, 10], googFs.sliceBlob(blob, -2));
-    assertArrayEquals(['moz', 3, 6], googFs.sliceBlob(blob, 3, 6));
-    assertArrayEquals(['moz', 3, -6], googFs.sliceBlob(blob, 3, -6));
-
-    // Simulate Chrome 20 that implements webkitSlice (new spec).
-    delete blob.mozSlice;
-    blob.webkitSlice = (start, end) => ['webkit', start, end];
-    tmpStubs.set(goog.userAgent, 'GECKO', false);
-    tmpStubs.set(goog.userAgent, 'WEBKIT', true);
-    tmpStubs.set(goog.userAgent, 'IE', false);
-    tmpStubs.set(goog.userAgent, 'VERSION', '536.10');
-    tmpStubs.set(goog.userAgent, 'isVersionOrHigherCache_', {});
-
-    // Expect webkitSlice to be called with no change to parameters.
-    assertArrayEquals(['webkit', 2, 10], googFs.sliceBlob(blob, 2));
-    assertArrayEquals(['webkit', -2, 10], googFs.sliceBlob(blob, -2));
-    assertArrayEquals(['webkit', 3, 6], googFs.sliceBlob(blob, 3, 6));
-    assertArrayEquals(['webkit', 3, -6], googFs.sliceBlob(blob, 3, -6));
-
-    tmpStubs.reset();
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testGetBlobThrowsError() {
-    stubs.remove(goog.global, 'BlobBuilder');
-    stubs.remove(goog.global, 'WebKitBlobBuilder');
-    stubs.remove(goog.global, 'Blob');
+    stubs.remove(globalThis, 'BlobBuilder');
+    stubs.remove(globalThis, 'WebKitBlobBuilder');
+    stubs.remove(globalThis, 'Blob');
 
     try {
       googFsBlob.getBlob();
@@ -662,7 +615,7 @@ testSuite({
 
   testGetBlobWithProperties() {
     // Skip test if browser doesn't support Blob API.
-    if (typeof (goog.global.Blob) != 'function') {
+    if (typeof (globalThis.Blob) != 'function') {
       return;
     }
 
@@ -671,10 +624,11 @@ testSuite({
     assertEquals('text/test', blob.type);
   },
 
+  /** @suppress {checkTypes} suppression added to enable type checking */
   testGetBlobWithPropertiesThrowsError() {
-    stubs.remove(goog.global, 'BlobBuilder');
-    stubs.remove(goog.global, 'WebKitBlobBuilder');
-    stubs.remove(goog.global, 'Blob');
+    stubs.remove(globalThis, 'BlobBuilder');
+    stubs.remove(globalThis, 'WebKitBlobBuilder');
+    stubs.remove(globalThis, 'Blob');
 
     try {
       googFsBlob.getBlobWithProperties();
@@ -687,6 +641,7 @@ testSuite({
     stubs.reset();
   },
 
+  /** @suppress {missingProperties} suppression added to enable type checking */
   testGetBlobWithPropertiesUsingBlobBuilder() {
     function BlobBuilder() {
       this.parts = [];
@@ -697,7 +652,7 @@ testSuite({
         return {type: type, builder: this};
       };
     }
-    stubs.set(goog.global, 'BlobBuilder', BlobBuilder);
+    stubs.set(globalThis, 'BlobBuilder', BlobBuilder);
 
     const blob =
         googFsBlob.getBlobWithProperties(['test'], 'text/test', 'native');

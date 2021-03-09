@@ -1,16 +1,8 @@
-// Copyright 2008 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview Progressive Emoji Palette renderer implementation.
@@ -38,6 +30,7 @@ goog.require('goog.ui.emoji.EmojiPaletteRenderer');
  * @final
  */
 goog.ui.emoji.ProgressiveEmojiPaletteRenderer = function(defaultImgUrl) {
+  'use strict';
   goog.ui.emoji.EmojiPaletteRenderer.call(this, defaultImgUrl);
 };
 goog.inherits(
@@ -48,6 +41,7 @@ goog.inherits(
 /** @override */
 goog.ui.emoji.ProgressiveEmojiPaletteRenderer.prototype
     .buildElementFromSpriteMetadata = function(dom, spriteInfo, displayUrl) {
+  'use strict';
   var width = spriteInfo.getWidthCssValue();
   var height = spriteInfo.getHeightCssValue();
   var x = spriteInfo.getXOffsetCssValue();
@@ -71,6 +65,7 @@ goog.ui.emoji.ProgressiveEmojiPaletteRenderer.prototype
 /** @override */
 goog.ui.emoji.ProgressiveEmojiPaletteRenderer.prototype
     .updateAnimatedPaletteItem = function(item, animatedImg) {
+  'use strict';
   // Just to be safe, we check for the existence of the img element within this
   // palette item before attempting to modify it.
   /** @type {!HTMLImageElement|undefined} */

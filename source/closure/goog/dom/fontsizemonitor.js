@@ -17,6 +17,7 @@ goog.require('goog.events');
 goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
 goog.require('goog.userAgent');
+goog.requireType('goog.events.BrowserEvent');
 
 
 // TODO(arv): Move this to goog.events instead.
@@ -42,6 +43,7 @@ goog.require('goog.userAgent');
  * @final
  */
 goog.dom.FontSizeMonitor = function(opt_domHelper) {
+  'use strict';
   goog.events.EventTarget.call(this);
 
   var dom = opt_domHelper || goog.dom.getDomHelper();
@@ -124,6 +126,7 @@ goog.dom.FontSizeMonitor.CHANGE_EVENT =
 
 /** @override */
 goog.dom.FontSizeMonitor.prototype.disposeInternal = function() {
+  'use strict';
   goog.dom.FontSizeMonitor.superClass_.disposeInternal.call(this);
 
   goog.events.unlisten(
@@ -146,6 +149,7 @@ goog.dom.FontSizeMonitor.prototype.disposeInternal = function() {
  * @private
  */
 goog.dom.FontSizeMonitor.prototype.handleResize_ = function(e) {
+  'use strict';
   // Only dispatch the event if the size really changed.  Some newer browsers do
   // not really change the font-size,  instead they zoom the whole page.  This
   // does trigger window resize events on the iframe but the logical pixel size

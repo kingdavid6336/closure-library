@@ -48,10 +48,13 @@
 
 goog.provide('goog.events.EventHandler');
 
-goog.forwardDeclare('goog.events.EventWrapper');
 goog.require('goog.Disposable');
 goog.require('goog.events');
 goog.require('goog.object');
+goog.requireType('goog.events.Event');
+goog.requireType('goog.events.EventId');
+goog.requireType('goog.events.EventTarget');
+goog.requireType('goog.events.EventWrapper');
 
 
 
@@ -65,6 +68,7 @@ goog.require('goog.object');
  * @template SCOPE
  */
 goog.events.EventHandler = function(opt_scope) {
+  'use strict';
   goog.Disposable.call(this);
   // TODO(mknichel): Rename this to this.scope_ and fix the classes in google3
   // that access this private variable. :(
@@ -108,6 +112,7 @@ goog.events.EventHandler.typeArray_ = [];
  */
 goog.events.EventHandler.prototype.listen = function(
     src, type, opt_fn, opt_options) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   return self.listen_(src, type, opt_fn, opt_options);
 };
@@ -131,6 +136,7 @@ goog.events.EventHandler.prototype.listen = function(
  */
 goog.events.EventHandler.prototype.listenWithScope = function(
     src, type, fn, options, scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   // TODO(mknichel): Deprecate this function.
   return self.listen_(src, type, fn, options, scope);
@@ -156,6 +162,7 @@ goog.events.EventHandler.prototype.listenWithScope = function(
  */
 goog.events.EventHandler.prototype.listen_ = function(
     src, type, opt_fn, opt_options, opt_scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   if (!Array.isArray(type)) {
     if (type) {
@@ -203,6 +210,7 @@ goog.events.EventHandler.prototype.listen_ = function(
  */
 goog.events.EventHandler.prototype.listenOnce = function(
     src, type, opt_fn, opt_options) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   return self.listenOnce_(src, type, opt_fn, opt_options);
 };
@@ -228,6 +236,7 @@ goog.events.EventHandler.prototype.listenOnce = function(
  */
 goog.events.EventHandler.prototype.listenOnceWithScope = function(
     src, type, fn, capture, scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   // TODO(mknichel): Deprecate this function.
   return self.listenOnce_(src, type, fn, capture, scope);
@@ -255,6 +264,7 @@ goog.events.EventHandler.prototype.listenOnceWithScope = function(
  */
 goog.events.EventHandler.prototype.listenOnce_ = function(
     src, type, opt_fn, opt_options, opt_scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   if (Array.isArray(type)) {
     for (var i = 0; i < type.length; i++) {
@@ -297,6 +307,7 @@ goog.events.EventHandler.prototype.listenOnce_ = function(
  */
 goog.events.EventHandler.prototype.listenWithWrapper = function(
     src, wrapper, listener, opt_capt) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   // TODO(mknichel): Remove the opt_scope from this function and then
   // templatize it.
@@ -323,6 +334,7 @@ goog.events.EventHandler.prototype.listenWithWrapper = function(
  */
 goog.events.EventHandler.prototype.listenWithWrapperAndScope = function(
     src, wrapper, listener, capture, scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   // TODO(mknichel): Deprecate this function.
   return self.listenWithWrapper_(src, wrapper, listener, capture, scope);
@@ -349,6 +361,7 @@ goog.events.EventHandler.prototype.listenWithWrapperAndScope = function(
  */
 goog.events.EventHandler.prototype.listenWithWrapper_ = function(
     src, wrapper, listener, opt_capt, opt_scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   wrapper.listen(
       src, listener, opt_capt, opt_scope || self.handler_ || self, self);
@@ -360,6 +373,7 @@ goog.events.EventHandler.prototype.listenWithWrapper_ = function(
  * @return {number} Number of listeners registered by this handler.
  */
 goog.events.EventHandler.prototype.getListenerCount = function() {
+  'use strict';
   var count = 0;
   for (var key in this.keys_) {
     if (Object.prototype.hasOwnProperty.call(this.keys_, key)) {
@@ -387,6 +401,7 @@ goog.events.EventHandler.prototype.getListenerCount = function() {
  */
 goog.events.EventHandler.prototype.unlisten = function(
     src, type, opt_fn, opt_options, opt_scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   if (Array.isArray(type)) {
     for (var i = 0; i < type.length; i++) {
@@ -427,6 +442,7 @@ goog.events.EventHandler.prototype.unlisten = function(
  */
 goog.events.EventHandler.prototype.unlistenWithWrapper = function(
     src, wrapper, listener, opt_capt, opt_scope) {
+  'use strict';
   var self = /** @type {!goog.events.EventHandler} */ (this);
   wrapper.unlisten(
       src, listener, opt_capt, opt_scope || self.handler_ || self, self);
@@ -438,7 +454,9 @@ goog.events.EventHandler.prototype.unlistenWithWrapper = function(
  * Unlistens to all events.
  */
 goog.events.EventHandler.prototype.removeAll = function() {
+  'use strict';
   goog.object.forEach(this.keys_, function(listenerObj, key) {
+    'use strict';
     if (this.keys_.hasOwnProperty(key)) {
       goog.events.unlistenByKey(listenerObj);
     }
@@ -454,6 +472,7 @@ goog.events.EventHandler.prototype.removeAll = function() {
  * @protected
  */
 goog.events.EventHandler.prototype.disposeInternal = function() {
+  'use strict';
   goog.events.EventHandler.superClass_.disposeInternal.call(this);
   this.removeAll();
 };
@@ -464,5 +483,6 @@ goog.events.EventHandler.prototype.disposeInternal = function() {
  * @param {goog.events.Event} e Event object.
  */
 goog.events.EventHandler.prototype.handleEvent = function(e) {
+  'use strict';
   throw new Error('EventHandler.handleEvent not implemented');
 };

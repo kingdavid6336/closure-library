@@ -20,6 +20,7 @@ goog.require('goog.events.EventTarget');
 goog.require('goog.events.Listenable');
 goog.require('goog.graphics.AffineTransform');
 goog.require('goog.math');
+goog.requireType('goog.graphics.AbstractGraphics');
 
 
 
@@ -38,6 +39,7 @@ goog.require('goog.math');
  *     http://en.wikipedia.org/wiki/Canvas_element for details.
  */
 goog.graphics.Element = function(element, graphics) {
+  'use strict';
   goog.events.EventTarget.call(this);
   this.element_ = element;
   this.graphics_ = graphics;
@@ -77,6 +79,7 @@ goog.graphics.Element.prototype.transform_ = null;
  * @return {Element} The underlying element.
  */
 goog.graphics.Element.prototype.getElement = function() {
+  'use strict';
   return this.element_;
 };
 
@@ -87,6 +90,7 @@ goog.graphics.Element.prototype.getElement = function() {
  *     element.
  */
 goog.graphics.Element.prototype.getGraphics = function() {
+  'use strict';
   return this.graphics_;
 };
 
@@ -104,6 +108,7 @@ goog.graphics.Element.prototype.getGraphics = function() {
  */
 goog.graphics.Element.prototype.setTransformation = function(
     x, y, rotate, centerX, centerY) {
+  'use strict';
   this.transform_ =
       goog.graphics.AffineTransform
           .getRotateInstance(goog.math.toRadians(rotate), centerX, centerY)
@@ -117,6 +122,7 @@ goog.graphics.Element.prototype.setTransformation = function(
  *     this element.
  */
 goog.graphics.Element.prototype.getTransform = function() {
+  'use strict';
   return this.transform_ ? this.transform_.clone() :
                            new goog.graphics.AffineTransform();
 };
@@ -128,6 +134,7 @@ goog.graphics.Element.prototype.getTransform = function() {
  *     transformation applied to this element.
  */
 goog.graphics.Element.prototype.setTransform = function(affineTransform) {
+  'use strict';
   this.transform_ = affineTransform.clone();
   this.getGraphics().setElementAffineTransform(this, affineTransform);
 };
@@ -136,6 +143,7 @@ goog.graphics.Element.prototype.setTransform = function(affineTransform) {
 /** @override */
 goog.graphics.Element.prototype.addEventListener = function(
     type, handler, opt_capture, opt_handlerScope) {
+  'use strict';
   goog.events.listen(
       this.element_, type, handler, opt_capture, opt_handlerScope);
 };
@@ -144,6 +152,7 @@ goog.graphics.Element.prototype.addEventListener = function(
 /** @override */
 goog.graphics.Element.prototype.removeEventListener = function(
     type, handler, opt_capture, opt_handlerScope) {
+  'use strict';
   goog.events.unlisten(
       this.element_, type, handler, opt_capture, opt_handlerScope);
 };
@@ -151,6 +160,7 @@ goog.graphics.Element.prototype.removeEventListener = function(
 
 /** @override */
 goog.graphics.Element.prototype.disposeInternal = function() {
+  'use strict';
   goog.graphics.Element.superClass_.disposeInternal.call(this);
   goog.asserts.assert(this.element_);
   goog.events.removeAll(this.element_);

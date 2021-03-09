@@ -1,16 +1,8 @@
-// Copyright 2013 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview List format and gender decision library with locale support.
@@ -56,6 +48,7 @@ goog.require('goog.labs.i18n.ListFormatSymbols');
  * @final
  */
 goog.labs.i18n.ListFormat = function() {
+  'use strict';
   /**
    * String for lists of exactly two items, containing {0} for the first,
    * and {1} for the second.
@@ -113,6 +106,7 @@ goog.labs.i18n.ListFormat = function() {
  */
 goog.labs.i18n.ListFormat.prototype.patternBasedJoinTwoStrings_ = function(
     pattern, first, second) {
+  'use strict';
   return pattern.replace('{0}', first).replace('{1}', second);
 };
 
@@ -125,6 +119,7 @@ goog.labs.i18n.ListFormat.prototype.patternBasedJoinTwoStrings_ = function(
  * @return {string} The items formatted into a string, as a list.
  */
 goog.labs.i18n.ListFormat.prototype.format = function(items) {
+  'use strict';
   var count = items.length;
   switch (count) {
     case 0:
@@ -163,6 +158,7 @@ goog.labs.i18n.ListFormat.prototype.format = function(items) {
  * @final
  */
 goog.labs.i18n.GenderInfo = function() {
+  'use strict';
   /**
    * Stores the language-aware mode of determining the gender of a list.
    * @private {goog.labs.i18n.GenderInfo.ListGenderStyle_}
@@ -210,6 +206,7 @@ goog.labs.i18n.GenderInfo.Gender = {
  * @return {goog.labs.i18n.GenderInfo.Gender} Get the gender of the list.
 */
 goog.labs.i18n.GenderInfo.prototype.getListGender = function(genders) {
+  'use strict';
   var Gender = goog.labs.i18n.GenderInfo.Gender;
 
   var count = genders.length;

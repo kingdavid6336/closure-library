@@ -1,16 +1,8 @@
-// Copyright 2018 The Closure Library Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * @license
+ * Copyright The Closure Library Authors.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /**
  * @fileoverview A single module to define user-agent specific environment
@@ -72,4 +64,45 @@ exports.getPollingInterval = function() {
   }
 
   return undefined;
+};
+
+
+/**
+ * For Fetch/upload OT, make three requests against the server endpoint.
+ * POST requests contain only dummy payload.
+ *
+ * https://developers.chrome.com/origintrials/#/view_trial/3524066708417413121
+ *
+ * 1) google.com token
+ *
+ * A329ozYiTjUmNz0Eh5wffNLiRjiVtFBptKBulP7UYXxKSuMVVhP3pVnlHnbrBg2ALEPd63boPZArHXg3+WlmagkAAAB/eyJvcmlnaW4iOiJodHRwczovL2dvb2dsZS5jb206NDQzIiwiZmVhdHVyZSI6IkZldGNoVXBsb2FkU3RyZWFtaW5nIiwiZXhwaXJ5IjoxNjA4OTIzMjA4LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ==
+ *
+ * 2) googleapis.com token
+ *
+ * To be registered after 1) is deployed.
+ *
+ * https://developers.chrome.com/origintrials/#/trials
+ *
+ * This function is expected to be called from background during the handshake.
+ * Exceptions will be logged by the caller.
+ *
+ * No stats or logs are collected on the client-side. To be disabled once the
+ * OT is expired.
+ *
+ * @param {string} path The base URL path for the requests
+ */
+exports.startOriginTrials = function(path) {
+  // NE: may need check if path has already contains query params?
+
+  // 1st req:  path?ot=1
+  // non-streaming upload request
+
+  // 2nd req:  path?ot=2
+  // h2-only streaming upload request
+
+  // 3rd req:  path?ot=3
+  // h1-allowed streaming upload request
+
+  // Example calling a Chrome API:
+  // goog.global.chrome.loadTimes().wasFetchedViaSpdy
 };

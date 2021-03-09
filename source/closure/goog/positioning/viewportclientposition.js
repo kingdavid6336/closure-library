@@ -17,6 +17,8 @@ goog.require('goog.positioning.ClientPosition');
 goog.require('goog.positioning.Overflow');
 goog.require('goog.positioning.OverflowStatus');
 goog.require('goog.style');
+goog.requireType('goog.math.Box');
+goog.requireType('goog.math.Size');
 
 
 
@@ -31,6 +33,7 @@ goog.require('goog.style');
  * @extends {goog.positioning.ClientPosition}
  */
 goog.positioning.ViewportClientPosition = function(arg1, opt_arg2) {
+  'use strict';
   goog.positioning.ClientPosition.call(this, arg1, opt_arg2);
 };
 goog.inherits(
@@ -51,6 +54,7 @@ goog.positioning.ViewportClientPosition.prototype.lastResortOverflow_ = 0;
  */
 goog.positioning.ViewportClientPosition.prototype.setLastResortOverflow =
     function(overflow) {
+  'use strict';
   this.lastResortOverflow_ = overflow;
 };
 
@@ -68,6 +72,7 @@ goog.positioning.ViewportClientPosition.prototype.setLastResortOverflow =
  */
 goog.positioning.ViewportClientPosition.prototype.reposition = function(
     element, popupCorner, opt_margin, opt_preferredSize) {
+  'use strict';
   var viewportElt = goog.style.getClientViewportElement(element);
   var viewport = goog.style.getVisibleRectForElement(viewportElt);
   var scrollEl = goog.dom.getDomHelper(element).getDocumentScrollElement();

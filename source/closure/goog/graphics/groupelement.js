@@ -13,6 +13,7 @@
 goog.provide('goog.graphics.GroupElement');
 
 goog.require('goog.graphics.Element');
+goog.requireType('goog.graphics.AbstractGraphics');
 
 
 
@@ -30,6 +31,7 @@ goog.require('goog.graphics.Element');
  *     http://en.wikipedia.org/wiki/Canvas_element for details.
  */
 goog.graphics.GroupElement = function(element, graphics) {
+  'use strict';
   goog.graphics.Element.call(this, element, graphics);
 };
 goog.inherits(goog.graphics.GroupElement, goog.graphics.Element);
